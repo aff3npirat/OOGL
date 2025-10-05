@@ -1,5 +1,6 @@
 add_library(ogl_lib STATIC
-    
+    model.cpp
+    render_context.cpp
 )
 
 find_package(OpenGL REQUIRED)
