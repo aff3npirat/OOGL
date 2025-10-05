@@ -1,6 +1,7 @@
 #pragma once
 
 #include <utility>
+#include <vector>
 
 #include <GL/Glew.h>
 
@@ -19,6 +20,7 @@ struct Buffer {
             values = new T[size];
             this->size = size;
         }
+        ~Implement() { delete[] values; }
 
         T* values;
         unsigned int size;
