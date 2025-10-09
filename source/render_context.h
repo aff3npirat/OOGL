@@ -150,14 +150,14 @@ class RenderContext {
             glBindBuffer(GL_ARRAY_BUFFER, bufferViews[i].buffer->uid());
             glVertexAttribPointer(
                 shaderAttribs[i],
-                bufferViews[i].numVertex,
+                bufferViews[i].vertexSize,
                 bufferViews[i].glType,
                 GL_FALSE,
                 bufferViews[i].stride * bufferViews[i].buffer->byteSize(),
                 bufferViews[i].offset * bufferViews[i].buffer->byteSize()
             );
 
-            if (!buffers.contains(bufferViews[i].buffer->uid)) {
+            if (!buffers.contains(bufferViews[i].buffer->uid())) {
                 buffers[bufferViews[i].buffer->uid()] = bufferViews[i].buffer;
             }
         }
