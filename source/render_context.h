@@ -38,7 +38,7 @@ class RenderContext {
                 bufferViews[i].glType,
                 GL_FALSE,
                 bufferViews[i].stride * bufferViews[i].buffer->byteSize(),
-                bufferViews[i].offset * bufferViews[i].buffer->byteSize()
+                (void*)(bufferViews[i].offset * bufferViews[i].buffer->byteSize())
             );
 
             if (!buffers.contains(bufferViews[i].buffer->uid())) {
@@ -52,9 +52,10 @@ class RenderContext {
 
         numBuffers = buffers.size();
         this->buffers = new Buffer*[numBuffers];
-        Buffer** it = buffers.begin();
+        std::map<GLuint, Buffer*>::iterator it = buffers.begin();
         for (int i = 0; i < numBuffers; i++) {
-            this->buffers[i] = it[i];
+            this->buffers[i] = it->second;
+            it++;
         }
     }
     ~RenderContext() { delete[] buffers; }
@@ -65,7 +66,7 @@ class RenderContext {
      * not store any data. All changes to @p model will be rendererd
      * when @ref RenderContext#render is called.
      */
-    void addModel(Model& model) { models.push_back(model); }
+    void addModel(Model* model) { models.push_back(model); }
     void render() {
         std::sort(models.begin(), models.end(), Model::compare);
 
@@ -80,10 +81,10 @@ class RenderContext {
                 batches.back().initialize(models[i]);
             }
 
-            models[i].insert(offset);
+            models[i]->insert(offset);
 
-            offset += models[i].getNumVertex();
-            batches.back().numVertex += models[i].getNumVertex();
+            offset += models[i]->getNumVertex();
+            batches.back().numVertex += models[i]->getNumVertex();
         }
 
         for (int i = 0; i < numBuffers; i++) {

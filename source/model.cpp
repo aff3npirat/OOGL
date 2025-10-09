@@ -8,9 +8,9 @@ ModelBase::Batch::Batch(unsigned int offset, unsigned int numVertex)
 }
 
 
-bool Textured3D::compare(Textured3D a, Textured3D b)
+bool Textured3D::compare(Textured3D* a, Textured3D* b)
 {
-    return a.texture < b.texture;
+    return a->texture < b->texture;
 }
 
 

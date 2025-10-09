@@ -16,16 +16,17 @@ class ModelBase {
         unsigned int numVertex;
     };
 
-    virtual ~ModelBase() = 0;
+    virtual ~ModelBase() {};
     virtual void insert(unsigned int offset) = 0;
     virtual unsigned int getNumVertex() = 0;
-    static bool compare(ModelBase a, ModelBase b);
+    static bool compare(ModelBase* a, ModelBase* b);
 };
 
 
 class Textured3D : public ModelBase {
   public:
     struct Batch : public ModelBase::Batch {
+        using ModelBase::Batch::Batch;
         void enter();
         void exit();
         void initialize(Textured3D* model);
@@ -33,7 +34,7 @@ class Textured3D : public ModelBase {
         GLuint texture;
     };
 
-    static bool compare(Textured3D a, Textured3D b);
+    static bool compare(Textured3D* a, Textured3D* b);
 
     Textured3D(BufferView* vertexBuffer, GLfloat* vertices, BufferView* uvBuffer, GLfloat* uvs, GLuint texture, unsigned int numVertex);
 

@@ -12,7 +12,7 @@
  */
 struct Buffer {
     struct Base {
-        virtual ~Base() = 0;
+        virtual ~Base() {};
         virtual void* getValues() = 0;
 
         unsigned int size;
