@@ -18,8 +18,8 @@
 struct Buffer {
     struct Base {
         virtual ~Base() = 0;
+        virtual void* getValues() = 0;
 
-        void* values;
         unsigned int size;
         unsigned int byteSize;
         GLuint uid;
@@ -36,10 +36,9 @@ struct Buffer {
         }
         ~Implement() { delete[] values; }
 
+        void* getValues() { return (void*)values; }
+
         T* values;
-        unsigned int size;
-        unsigned int byteSize;
-        GLuint uid;
     };
 
     ~Buffer() { delete ptr; }
@@ -54,7 +53,7 @@ struct Buffer {
     unsigned int size() { return ptr->size; }
     
     /** @returns Void pointer to array. */
-    void* data() { return (void*)ptr->values; }
+    void* data() { return ptr->getValues(); }
 
     /** @returns unique OGL id assigned to a GL Buffer Object. */
     unsigned int uid() { return ptr->uid; }
