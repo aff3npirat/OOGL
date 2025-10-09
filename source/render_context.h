@@ -182,11 +182,11 @@ class RenderContext {
      * when @ref RenderContext#render is called.
      */
     void addModel(Model& model) { models.push_back(model); }
-    template<IsBatch Batch> void render() {
+    void render() {
         std::sort(models.begin(), models.end(), Model::compare);
 
         unsigned int offset = 0;
-        std::vector<Batch*> batches;
+        std::vector<Model::Batch*> batches;
         batches.emplace_back(offset, 0);
         batches.back().initialize(models[0]);
 

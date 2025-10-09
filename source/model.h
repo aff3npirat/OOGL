@@ -25,7 +25,7 @@ class ModelBase {
 
 class Textured3D : public ModelBase {
   public:
-    struct TextureBatch : public Batch {
+    struct Batch : public ModelBase::Batch {
         void enter();
         void exit();
         void initialize(Textured3D* model);

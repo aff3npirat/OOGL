@@ -1,6 +1,13 @@
 #include "model.h"
 
 
+ModelBase::Batch::Batch(unsigned int offset, unsigned int numVertex)
+{
+    this->offset = offset;
+    this->numVertex = numVertex;
+}
+
+
 bool Textured3D::compare(Textured3D a, Textured3D b)
 {
     return a.texture < b.texture;
@@ -37,26 +44,19 @@ GLuint Textured3D::getTexture()
 }
 
 
-void Textured3D::TextureBatch::enter()
+void Textured3D::Batch::enter()
 {
     glBindTexture(GL_TEXTURE_2D, texture);
 }
 
 
-void Textured3D::TextureBatch::exit()
+void Textured3D::Batch::exit()
 {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
-void Textured3D::TextureBatch::initialize(Textured3D *model)
+void Textured3D::Batch::initialize(Textured3D *model)
 {
     texture = model->getTexture();
-}
-
-
-ModelBase::Batch::Batch(unsigned int offset, unsigned int numVertex)
-{
-    this->offset = offset;
-    this->numVertex = numVertex;
 }
