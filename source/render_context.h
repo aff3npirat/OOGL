@@ -26,7 +26,7 @@ struct Buffer {
     };
 
     template<typename T>
-    struct Implement : Base {
+    struct Implement : public Base {
         Implement(unsigned int size) {
             values = new T[size];
             this->size = size;
@@ -97,7 +97,7 @@ struct BufferView {
      * 
      * @param values values to insert.
      * @param size number of values to insert. Must be divisible by @code vertexSize @endcode .
-     * @param tempOffset additional offset from from first group. Can be used
+     * @param tempOffset additional offset of elements from first group. Can be used
      * to fill referenced @ref Buffer batchwise.
      */
     template<typename T>
@@ -125,10 +125,13 @@ struct BufferView {
 
 
 template<class C>
-concept IsModelBaseSubClass = std::is_base_of<ModelBase, C>::value;
+concept IsModel = std::is_base_of<ModelBase, C>::value;
+
+template<class C>
+concept IsBatch = std::is_base_of<ModelBase::Batch, C>::value;
 
 /** Manages VAO initialization and data transfer to GPU. */
-template<IsModelBaseSubClass Model>
+template<IsModel Model>
 class RenderContext {
   public:
     /**
@@ -179,7 +182,43 @@ class RenderContext {
      * when @ref RenderContext#render is called.
      */
     void addModel(Model& model) { models.push_back(model); }
-    void render() {}
+    template<IsBatch Batch> void render() {
+        std::sort(models.begin(), models.end(), Model::compare);
+
+        unsigned int offset = 0;
+        std::vector<Batch*> batches;
+        batches.emplace_back(offset, 0);
+        batches.back().initialize(models[0]);
+
+        for (int i = 1; i < models.size(); i++) {
+            if (Model::compare(models[i-1], models[i])) {
+                batches.emplace_back(offset, 0);
+                batches.back().initialize(models[i]);
+            }
+
+            models[i].insert(offset);
+
+            offset += models[i].getNumVertex();
+            batches.back().numVertex += models[i].getNumVertex();
+        }
+
+        for (int i = 0; i < numBuffers; i++) {
+            glBindBuffer(GL_ARRAY_BUFFER, buffers[i]->uid());
+            glBufferData(GL_ARRAY_BUFFER, buffers[i]->byteSize() * buffers[i]->size(), buffers[i]->data(), GL_STATIC_DRAW);
+        }
+
+        for (int i = 0; i < numAttribs; i++) {
+            glEnableVertexAttribArray(shaderAttribs[i]);
+        }
+        for (int i = 0; i < batches.size(); i++) {
+            batches[i].enter();
+            glDrawArrays(GL_TRIANGLES, batches[i].offset, batches[i].numVertices);
+            batches[i].exit();
+        }
+        for (int i = 0; i < numAttribs; i++) {
+            glDisableVertexAttribArray(shaderAttribs[i]);
+        }
+    }
 
   private:
     GLuint vao;
