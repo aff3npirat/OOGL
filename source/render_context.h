@@ -70,7 +70,7 @@ class RenderContext {
         std::sort(models.begin(), models.end(), Model::compare);
 
         unsigned int offset = 0;
-        std::vector<Model::Batch*> batches;
+        std::vector<typename Model::Batch> batches;
         batches.emplace_back(offset, 0);
         batches.back().initialize(models[0]);
 
@@ -96,7 +96,7 @@ class RenderContext {
         }
         for (int i = 0; i < batches.size(); i++) {
             batches[i].enter();
-            glDrawArrays(GL_TRIANGLES, batches[i].offset, batches[i].numVertices);
+            glDrawArrays(GL_TRIANGLES, batches[i].offset, batches[i].numVertex);
             batches[i].exit();
         }
         for (int i = 0; i < numAttribs; i++) {
