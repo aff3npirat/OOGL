@@ -71,6 +71,11 @@ class Render {
      * when @ref RenderContext#render is called.
      */
     void addModel(Model* model) { models.push_back(model); }
+    /** Renders all stored models.
+     * 
+     * Data from all stored models will be transferred to GPU and rendered
+     * in specific order to minimize glDraw calls.
+     */
     void render() {
         std::sort(models.begin(), models.end(), Model::compare);
 
