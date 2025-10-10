@@ -28,6 +28,7 @@ class RenderContext {
         glBindVertexArray(vao);
         
         std::map<GLuint, Buffer*> buffers;
+        this->shaderAttribs = new unsigned int[size];
         for (int i = 0; i < size; i++) {
             this->shaderAttribs[i] = shaderAttribs[i];
 
@@ -58,7 +59,10 @@ class RenderContext {
             it++;
         }
     }
-    ~RenderContext() { delete[] buffers; }
+    ~RenderContext() {
+        delete[] buffers;
+        delete[] shaderAttribs;
+    }
 
     /** Stores model reference to render.
      * 
@@ -72,8 +76,9 @@ class RenderContext {
 
         unsigned int offset = 0;
         std::vector<typename Model::Batch> batches;
-        batches.emplace_back(offset, 0);
+        batches.emplace_back(offset, models[0]->getNumVertex());
         batches.back().initialize(models[0]);
+        models[0]->insert(offset);
 
         for (int i = 1; i < models.size(); i++) {
             if (Model::compare(models[i-1], models[i])) {
@@ -87,10 +92,12 @@ class RenderContext {
             batches.back().numVertex += models[i]->getNumVertex();
         }
 
+        glBindVertexArray(vao);
         for (int i = 0; i < numBuffers; i++) {
             glBindBuffer(GL_ARRAY_BUFFER, buffers[i]->uid());
             glBufferData(GL_ARRAY_BUFFER, buffers[i]->byteSize() * buffers[i]->size(), buffers[i]->data(), GL_STATIC_DRAW);
         }
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         for (int i = 0; i < numAttribs; i++) {
             glEnableVertexAttribArray(shaderAttribs[i]);
@@ -103,6 +110,7 @@ class RenderContext {
         for (int i = 0; i < numAttribs; i++) {
             glDisableVertexAttribArray(shaderAttribs[i]);
         }
+        glBindVertexArray(0);
     }
 
   private:
