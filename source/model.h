@@ -3,12 +3,10 @@
 #include "buffer.h"
 
 
-/** Interface of a collection of Vertex data.
+/** Interface of a collection of Vertex data and sorting logic.
  * 
- * Stores vertex Data and provides methods to modify vertices (e.g. transposing, rotating).
- * When rendering each model inserts its data into corresponding @ref Buffer.
- * Must provide a static method to compare models for rendering optimization aswell as a
- * render context.
+ * Stores vertex data and provides methods to modify these (e.g. rotating, transposing).
+ * Also implements sorting logic to enable optimized rendering.
  */
 class ModelBase {
   public:
