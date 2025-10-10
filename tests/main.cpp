@@ -326,7 +326,7 @@ int main() {
 	Textured3D cube(&vbo, &cubeVertices[0], &uvbo, &cubeUvs[0], texture, 36);
 	unsigned int shaderAttribs[2] = {0, 1};
 
-	RenderContext<Textured3D> context(&attribs[0], &shaderAttribs[0], 2);
+	Render<Textured3D> context(&attribs[0], &shaderAttribs[0], 2);
 	context.addModel(&cube);
 
 	glClearColor(0.0, 0.0, 0.0, 0.0f);

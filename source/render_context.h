@@ -16,14 +16,14 @@ concept IsModel = std::is_base_of<ModelBase, C>::value;
 
 template<IsModel Model>
 /** Manages VAO initialization and data transfer to GPU. */
-class RenderContext {
+class Render {
   public:
     /**
      * @param bufferViews each view is linked to specific shader attribute.
      * @param shaderAttribs shader attributes linked to @p bufferViews .
      * @param size number of @p bufferViews and @p shaderAttribs . 
      */
-    RenderContext(BufferView* bufferViews, unsigned int* shaderAttribs, unsigned int size) {
+    Render(BufferView* bufferViews, unsigned int* shaderAttribs, unsigned int size) {
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
         
@@ -59,7 +59,7 @@ class RenderContext {
             it++;
         }
     }
-    ~RenderContext() {
+    ~Render() {
         delete[] buffers;
         delete[] shaderAttribs;
     }
