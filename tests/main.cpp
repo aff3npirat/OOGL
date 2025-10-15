@@ -218,6 +218,8 @@ int main() {
     init_glew();
     glfwSwapInterval(0);
 
+    printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
+
     GLuint textureShader = load_shaders(
         "../shaders/vertex.vertexshader",
         "../shaders/fragment.fragmentshader"
