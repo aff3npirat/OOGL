@@ -9,15 +9,12 @@
 #include <type_traits>
 
 
-enum UNIFORM_TYPE { SCALAR, VEC2, VEC3, VEC4 };
-enum MATDIM { MAT2x2, MAT2x3, MAT2x4, MAT3x2, MAT3x3, MAT3x4, MAT4x2, MAT4x3, MAT4x4 };
-
-template<typename T> concept UniformScalarType =
+template<typename T> concept UniformScalar =
     (std::is_same<T, GLint>::value || std::is_same<T, GLfloat>::value ||
-     std::is_same<T, GLuint>::value);
+     std::is_same<T, GLuint>::value || std::is_same<T, GLboolean>::value);
 
 class ShaderProgram {
-   public:
+  public:
     static void compileShader(const char* vertexSource, const char* fragmentSource);
 
     ShaderProgram(
@@ -27,22 +24,13 @@ class ShaderProgram {
     void use();
     void disable();
 
-    template<UniformScalarType T>
-    void setUniform(std::string location, T* v0, T* v1 = nullptr, T* v2 = nullptr, T* v3 = nullptr);
-    template<UniformScalarType T>
-    void setUniformArray(std::string location, GLsizei count, T* values, UNIFORM_TYPE uniformType);
-    template<UniformScalarType T>
-    void setUniformMatrixArray(
-        std::string location, GLsizei count, GLboolean transpose, T* values, MATDIM dim);
+    template<UniformScalar T> void setUniform(std::string name, T* values, GLsizei count = 1);
+    template<UniformScalar T>
+    void setUniform(std::string name, T* values, GLboolean transpose, GLsizei count = 1);
 
-   private:
-    template<UniformScalarType T>
-    void setUniform(GLint location, T* v0, T* v1 = nullptr, T* v2 = nullptr, T* v3 = nullptr);
-    template<UniformScalarType T>
-    void setUniformArray(GLint location, GLsizei, T* values, UNIFORM_TYPE uniformType);
-    template<UniformScalarType T>
-    void setUniformMatrixArray(
-        GLint location, GLsizei count, GLboolean transpose, T* values, MATDIM dim);
+  private:
+    template<UniformScalar T>
+    void _setUniform(std::string name, T* values, GLsizei count, GLboolean transpose);
 
     void setupContext();
     void undoContext();
@@ -50,161 +38,77 @@ class ShaderProgram {
     GLuint id;
     unsigned int* attribs;
     unsigned int numAttribs;
-    std::vector<std::function<void()> > uniformSetters;
+    std::vector<std::function<void()>> uniformSetters;
+    std::map<std::string, std::pair<GLint, GLuint>>
+        uniformLookup;  // Maps name to (location, index)
 };
 
 
-template<UniformScalarType T>
-inline void ShaderProgram::setUniform(std::string location, T* v0, T* v1, T* v2, T* v3)
+template<UniformScalar T>
+inline void ShaderProgram::setUniform(std::string name, T* values, GLsizei count)
 {
-    setUniform(glGetUniformLocation(id, location.c_str()), v0, v1, v2, v3);
+    _setUniform(name, values, count, GL_FALSE);
 }
 
 
-template<UniformScalarType T>
-inline void ShaderProgram::setUniformArray(
-    std::string location, GLsizei count, T* values, UNIFORM_TYPE uniformType)
+template<UniformScalar T>
+inline void ShaderProgram::setUniform(
+    std::string name, T* values, GLboolean transpose, GLsizei count)
 {
-    setUniformArray(glGetUniformLocation(id, location.c_str()), count, values, uniformType);
+    _setUniform(name, values, count, transpose);
 }
 
 
-template<UniformScalarType T>
-inline void ShaderProgram::setUniformMatrixArray(
-    std::string location, GLsizei count, GLboolean transpose, T* values, MATDIM dim)
+template<UniformScalar T>
+inline void ShaderProgram::_setUniform(
+    std::string name, T* values, GLsizei count, GLboolean transpose)
 {
-    setUniformMatrixArray(
-        glGetUniformLocation(id, location.c_str()), count, transpose, values, dim);
-}
+    GLuint index = uniformLookup[name].second;
+    GLint location = uniformLookup[name].first;
 
+    GLenum type;
+    glGetActiveUniform(id, index, 0, nullptr, nullptr, &type, nullptr);
 
-template<UniformScalarType T>
-inline void ShaderProgram::setUniform(GLint location, T* v0, T* v1, T* v2, T* v3)
-{
-    UNIFORM_TYPE version = UNIFORM_TYPE::SCALAR;
-    if (v1 != nullptr) {
-        version = UNIFORM_TYPE::VEC2;
-        if (v2 != nullptr) {
-            version = UNIFORM_TYPE::VEC3;
-            if (v3 != nullptr) {
-                version = UNIFORM_TYPE::VEC4;
-            }
-        }
+    void (*callback)(GLint, GLsizei, T*);
+    bool isNoMatrix = true;
+    switch (type) {
+        // SCALARS
+        case GL_FLOAT: callback = glUniform1fv;
+        case GL_INT: callback = glUniform1iv;
+        case GL_UNSIGNED_INT || GL_BOOL: callback = glUniform1uiv;
+        // VEC2
+        case GL_FLOAT_VEC2: callback = glUniform2fv;
+        case GL_INT_VEC2: callback = glUniform2iv;
+        case GL_UNSIGNED_INT_VEC2 || GL_BOOL_VEC2: callback = glUniform2uiv;
+        // VEC3
+        case GL_FLOAT_VEC3: callback = glUniform3fv;
+        case GL_INT_VEC3: callback = glUniform3iv;
+        case GL_UNSIGNED_INT_VEC3 || GL_BOOL_VEC3: callback = glUniform3uiv;
+        // VEC4
+        case GL_FLOAT_VEC4: callback = glUniform4fv;
+        case GL_INT_VEC4: callback = glUniform4iv;
+        case GL_UNSIGNED_INT_VEC4 || GL_BOOL_VEC4: callback = glUniform4uiv;
+        default: isNoMatrix = false;
     }
 
-    std::function<void()> callback;
-    if constexpr (std::is_same<T, GLint>::value || std::is_same<T, GLboolean>::value) {
-        switch (version) {
-            case UNIFORM_TYPE::SCALAR:
-                callback = [=]() { glUniform1i(location, *v0); };
-            case UNIFORM_TYPE::VEC2:
-                callback = [=]() { glUniform2i(location, *v0, *v1); };
-            case UNIFORM_TYPE::VEC3:
-                callback = [=]() { glUniform3i(location, *v0, *v1, *v2); };
-            case UNIFORM_TYPE::VEC4:
-                callback = [=]() { glUniform4i(location, *v0, *v1, *v2, *v3); };
-        }
-    }
-    else if constexpr (std::is_same<T, GLfloat>::value) {
-        switch (version) {
-            case UNIFORM_TYPE::SCALAR:
-                callback = [=]() { glUniform1f(location, *v0); };
-            case UNIFORM_TYPE::VEC2:
-                callback = [=]() { glUniform2f(location, *v0, *v1); };
-            case UNIFORM_TYPE::VEC3:
-                callback = [=]() { glUniform3f(location, *v0, *v1, *v2); };
-            case UNIFORM_TYPE::VEC4:
-                callback = [=]() { glUniform4f(location, *v0, *v1, *v2, *v3); };
-        }
-    }
-    else if constexpr (std::is_same<T, GLuint>::value) {
-        switch (version) {
-            case UNIFORM_TYPE::SCALAR:
-                callback = [=]() { glUniform1ui(location, *v0); };
-            case UNIFORM_TYPE::VEC2:
-                callback = [=]() { glUniform2ui(location, *v0, *v1); };
-            case UNIFORM_TYPE::VEC3:
-                callback = [=]() { glUniform3ui(location, *v0, *v1, *v2); };
-            case UNIFORM_TYPE::VEC4:
-                callback = [=]() { glUniform4ui(location, *v0, *v1, *v2, *v3); };
-        }
+    if (isNoMatrix) {
+        uniformSetters.push_back([=]() { callback(location, count, values); });
+        return;
     }
 
-    uniformSetters.push_back(callback);
-}
-
-
-template<UniformScalarType T>
-inline void ShaderProgram::setUniformArray(
-    GLint location, GLsizei count, T* values, UNIFORM_TYPE uniformType)
-{
-    std::function<void()> callback;
-    if constexpr (std::is_same<T, GLint>::value || std::is_same<T, GLboolean>::value) {
-        switch (uniformType) {
-            case UNIFORM_TYPE::SCALAR:
-                callback = [=]() { glUniform1iv(location, count, values); };
-            case UNIFORM_TYPE::VEC2:
-                callback = [=]() { glUniform2iv(location, count, values); };
-            case UNIFORM_TYPE::VEC3:
-                callback = [=]() { glUniform3iv(location, count, values); };
-            case UNIFORM_TYPE::VEC4:
-                callback = [=]() { glUniform4iv(location, count, values); };
-        }
-    }
-    else if constexpr (std::is_same<T, GLfloat>::value) {
-        switch (uniformType) {
-            case UNIFORM_TYPE::SCALAR:
-                callback = [=]() { glUniform1fv(location, count, values); };
-            case UNIFORM_TYPE::VEC2:
-                callback = [=]() { glUniform2fv(location, count, values); };
-            case UNIFORM_TYPE::VEC3:
-                callback = [=]() { glUniform3fv(location, count, values); };
-            case UNIFORM_TYPE::VEC4:
-                callback = [=]() { glUniform4fv(location, count, values); };
-        }
-    }
-    else if constexpr (std::is_same<T, GLuint>::value) {
-        switch (uniformType) {
-            case UNIFORM_TYPE::SCALAR:
-                callback = [=]() { glUniform1uiv(location, count, values); };
-            case UNIFORM_TYPE::VEC2:
-                callback = [=]() { glUniform2uiv(location, count, values); };
-            case UNIFORM_TYPE::VEC3:
-                callback = [=]() { glUniform3uiv(location, count, values); };
-            case UNIFORM_TYPE::VEC4:
-                callback = [=]() { glUniform4uiv(location, count, values); };
-        }
+    void (*callback)(GLint, GLsizei, GLboolean, T*);
+    switch (type) {
+        // MATRICES
+        case GL_FLOAT_MAT2: callback = glUniformMatrix2fv;
+        case GL_FLOAT_MAT2x3: callback = glUniformMatrix2x3fv;
+        case GL_FLOAT_MAT2x4: callback = glUniformMatrix2x4fv;
+        case GL_FLOAT_MAT3x2: callback = glUniformMatrix3x2fv;
+        case GL_FLOAT_MAT3: callback = glUniformMatrix3fv;
+        case GL_FLOAT_MAT3x4: callback = glUniformMatrix3x4fv;
+        case GL_FLOAT_MAT4x2: callback = glUniformMatrix4x2fv;
+        case GL_FLOAT_MAT4x3: callback = glUniformMatrix4x3fv;
+        case GL_FLOAT_MAT4: callback = glUniformMatrix4fv;
     }
 
-    uniformSetters.push_back(callback);
-}
-
-
-template<UniformScalarType T>
-inline void ShaderProgram::setUniformMatrixArray(
-    GLint location, GLsizei count, GLboolean transpose, T* values, MATDIM dim)
-{
-    std::function<void()> callback;
-    switch (dim) {
-        case MATDIM::MAT2x2:
-            callback = [=]() { glUniformMatrix2fv(location, count, transpose, values); };
-        case MATDIM::MAT2x3:
-            callback = [=]() { glUniformMatrix2x3fv(location, count, transpose, values); };
-        case MATDIM::MAT2x4:
-            callback = [=]() { glUniformMatrix2x4fv(location, count, transpose, values); };
-        case MATDIM::MAT3x2:
-            callback = [=]() { glUniformMatrix3x2fv(location, count, transpose, values); };
-        case MATDIM::MAT3x3:
-            callback = [=]() { glUniformMatrix3fv(location, count, transpose, values); };
-        case MATDIM::MAT3x4:
-            callback = [=]() { glUniformMatrix3x4fv(location, count, transpose, values); };
-        case MATDIM::MAT4x2:
-            callback = [=]() { glUniformMatrix4x2fv(location, count, transpose, values); };
-        case MATDIM::MAT4x3:
-            callback = [=]() { glUniformMatrix4x3fv(location, count, transpose, values); };
-        case MATDIM::MAT4x4:
-            callback = [=]() { glUniformMatrix4fv(location, count, transpose, values); };
-    }
-
-    uniformSetters.push_back(callback);
+    uniformSetters.push_back([=]() { callback(location, count, transpose, values); });
 }
