@@ -2,6 +2,7 @@ add_library(ogl_lib STATIC
     buffer.cpp
     model.cpp
     render_context.cpp
+    shader.cpp
 )
 
 find_package(OpenGL REQUIRED)

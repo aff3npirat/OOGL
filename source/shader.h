@@ -13,18 +13,18 @@ template<typename T> concept UniformScalar =
     (std::is_same<T, GLint>::value || std::is_same<T, GLfloat>::value ||
      std::is_same<T, GLuint>::value || std::is_same<T, GLboolean>::value);
 
+/** Provides simplified access to OGL shader API. */
 class ShaderProgram {
   public:
-    static void compileShader(const char* vertexSource, const char* fragmentSource);
+    static GLuint compileShader(const char* vertexSource, const char* fragmentSource);
 
-    ShaderProgram(
-        const char* vertexShader, const char* fragmentShader, unsigned int* attribs,
-        unsigned int numAttribs);
+    ShaderProgram(const char* vertexShader, const char* fragmentShader);
 
     void use();
     void disable();
 
-    template<UniformScalar T> void setUniform(std::string name, T* values, GLsizei count = 1);
+    template<UniformScalar T>
+    void setUniform(std::string name, T* values, GLsizei count = 1);
     template<UniformScalar T>
     void setUniform(std::string name, T* values, GLboolean transpose, GLsizei count = 1);
 
@@ -36,7 +36,6 @@ class ShaderProgram {
     void undoContext();
 
     GLuint id;
-    unsigned int* attribs;
     unsigned int numAttribs;
     std::vector<std::function<void()>> uniformSetters;
     std::map<std::string, std::pair<GLint, GLuint>>
@@ -44,6 +43,7 @@ class ShaderProgram {
 };
 
 
+/** Binds a non-matrix uniform to a value. */
 template<UniformScalar T>
 inline void ShaderProgram::setUniform(std::string name, T* values, GLsizei count)
 {
@@ -51,6 +51,7 @@ inline void ShaderProgram::setUniform(std::string name, T* values, GLsizei count
 }
 
 
+/** Binds a uniform of type matrix to a value. */
 template<UniformScalar T>
 inline void ShaderProgram::setUniform(
     std::string name, T* values, GLboolean transpose, GLsizei count)
@@ -59,6 +60,16 @@ inline void ShaderProgram::setUniform(
 }
 
 
+/** Binds a uniform variable to a value.
+ *
+ * @param name variable name in GLSL Shader program.
+ * @param values value to bind uniform to. The value will be evaluated when @ref ShaderProgram#use
+ * is called. When setting non-scalar uniforms should point to first address of tightly packed
+ * values, same for when setting uniform arrays.
+ * @param count for uniform arrays specifies number of elements to set. Should be 1 for non-arrays.
+ * @param transpose when setting uniform of matrix type should be @code true @endcode if values
+ * should be read in transposed order. Ignored for non matrix uniforms.
+ */
 template<UniformScalar T>
 inline void ShaderProgram::_setUniform(
     std::string name, T* values, GLsizei count, GLboolean transpose)
@@ -96,19 +107,19 @@ inline void ShaderProgram::_setUniform(
         return;
     }
 
-    void (*callback)(GLint, GLsizei, GLboolean, T*);
+    void (*matrix_callback)(GLint, GLsizei, GLboolean, T*);
     switch (type) {
         // MATRICES
-        case GL_FLOAT_MAT2: callback = glUniformMatrix2fv;
-        case GL_FLOAT_MAT2x3: callback = glUniformMatrix2x3fv;
-        case GL_FLOAT_MAT2x4: callback = glUniformMatrix2x4fv;
-        case GL_FLOAT_MAT3x2: callback = glUniformMatrix3x2fv;
-        case GL_FLOAT_MAT3: callback = glUniformMatrix3fv;
-        case GL_FLOAT_MAT3x4: callback = glUniformMatrix3x4fv;
-        case GL_FLOAT_MAT4x2: callback = glUniformMatrix4x2fv;
-        case GL_FLOAT_MAT4x3: callback = glUniformMatrix4x3fv;
-        case GL_FLOAT_MAT4: callback = glUniformMatrix4fv;
+        case GL_FLOAT_MAT2: matrix_callback = glUniformMatrix2fv;
+        case GL_FLOAT_MAT2x3: matrix_callback = glUniformMatrix2x3fv;
+        case GL_FLOAT_MAT2x4: matrix_callback = glUniformMatrix2x4fv;
+        case GL_FLOAT_MAT3x2: matrix_callback = glUniformMatrix3x2fv;
+        case GL_FLOAT_MAT3: matrix_callback = glUniformMatrix3fv;
+        case GL_FLOAT_MAT3x4: matrix_callback = glUniformMatrix3x4fv;
+        case GL_FLOAT_MAT4x2: matrix_callback = glUniformMatrix4x2fv;
+        case GL_FLOAT_MAT4x3: matrix_callback = glUniformMatrix4x3fv;
+        case GL_FLOAT_MAT4: matrix_callback = glUniformMatrix4fv;
     }
 
-    uniformSetters.push_back([=]() { callback(location, count, transpose, values); });
+    uniformSetters.push_back([=]() { matrix_callback(location, count, transpose, values); });
 }
