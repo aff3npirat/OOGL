@@ -20,7 +20,7 @@ GLuint compileShader(const char* vertexSource, const char* fragmentSource)
             printf("compile error:\n%s", log.data());
         }
     };
-    
+
     checkShader(vertexID);
 
     printf("Compiling fragment shader\n");
@@ -64,7 +64,7 @@ ShaderProgram::ShaderProgram(const char* vertexShader, const char* fragmentShade
     glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &queryResult);
     for (GLint i = 0; i < queryResult; i++) {
         glGetActiveUniform(id, i, maxLength, &length, nullptr, nullptr, nameBuf);
-        
+
         std::string name(nameBuf, length);
         GLint location = glGetUniformLocation(id, name.c_str());
 

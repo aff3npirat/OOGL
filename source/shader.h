@@ -21,20 +21,17 @@ class ShaderProgram {
   public:
     ShaderProgram(const char* vertexShader, const char* fragmentShader);
 
+    template<UniformScalar T>
+    void bindUniform(std::string name, T* values, GLsizei count = 1);
+    template<UniformScalar T>
+    void bindUniform(std::string name, T* values, GLboolean transpose, GLsizei count = 1);
+
     void use();
     void disable();
 
-    template<UniformScalar T>
-    void setUniform(std::string name, T* values, GLsizei count = 1);
-    template<UniformScalar T>
-    void setUniform(std::string name, T* values, GLboolean transpose, GLsizei count = 1);
-
   private:
     template<UniformScalar T>
-    void _setUniform(std::string name, T* values, GLsizei count, GLboolean transpose);
-
-    void setupContext();
-    void undoContext();
+    void _bindUniform(std::string name, T* values, GLsizei count, GLboolean transpose);
 
     GLuint id;
     unsigned int numAttribs;
@@ -46,18 +43,18 @@ class ShaderProgram {
 
 /** Binds a non-matrix uniform to a value. */
 template<UniformScalar T>
-inline void ShaderProgram::setUniform(std::string name, T* values, GLsizei count)
+inline void ShaderProgram::bindUniform(std::string name, T* values, GLsizei count)
 {
-    _setUniform(name, values, count, GL_FALSE);
+    _bindUniform(name, values, count, GL_FALSE);
 }
 
 
 /** Binds a uniform of type matrix to a value. */
 template<UniformScalar T>
-inline void ShaderProgram::setUniform(
+inline void ShaderProgram::bindUniform(
     std::string name, T* values, GLboolean transpose, GLsizei count)
 {
-    _setUniform(name, values, count, transpose);
+    _bindUniform(name, values, count, transpose);
 }
 
 
@@ -72,7 +69,7 @@ inline void ShaderProgram::setUniform(
  * should be read in transposed order. Ignored for non matrix uniforms.
  */
 template<UniformScalar T>
-inline void ShaderProgram::_setUniform(
+inline void ShaderProgram::_bindUniform(
     std::string name, T* values, GLsizei count, GLboolean transpose)
 {
     GLuint index = uniformLookup[name].second;
