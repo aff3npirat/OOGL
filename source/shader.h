@@ -31,7 +31,7 @@ class ShaderProgram {
     void bindUniform(std::string name, T* values, GLsizei count = 1);
     /** Binds a uniform of type matrix to a value. */
     template<UniformScalar T>
-    void bindUniform(std::string name, T* values, GLboolean transpose, GLsizei count = 1);
+    void bindUniform(std::string name, GLboolean transpose, T* values, GLsizei count = 1);
     /**
      * @param name name of attribute variable.
      * @returns index of an attribute variable.
@@ -78,7 +78,7 @@ inline void ShaderProgram::bindUniform(std::string name, T* values, GLsizei coun
 
 template<UniformScalar T>
 inline void ShaderProgram::bindUniform(
-    std::string name, T* values, GLboolean transpose, GLsizei count)
+    std::string name, GLboolean transpose, T* values, GLsizei count)
 {
     _bindUniform(name, values, count, transpose);
 }
