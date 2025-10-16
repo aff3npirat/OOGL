@@ -37,6 +37,7 @@ class ShaderProgram {
      * @returns index of an attribute variable.
      */
     GLint getAttribIndex(std::string name);
+    unsigned int getNumAttribs();
     void registerGLSetting(callback_t set, callback_t unset = nullptr);
     /** Binds shader to ogl context and enables/sets attributes/uniforms. */
     void use();

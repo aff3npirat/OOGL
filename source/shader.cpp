@@ -81,6 +81,12 @@ GLint ShaderProgram::getAttribIndex(std::string name)
 }
 
 
+unsigned int ShaderProgram::getNumAttribs()
+{
+    return numAttribs;
+}
+
+
 void ShaderProgram::registerGLSetting(callback_t set, callback_t unset = nullptr)
 {
     oglSetting = set;
