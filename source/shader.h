@@ -26,19 +26,35 @@ class ShaderProgram {
   public:
     ShaderProgram(const char* vertexShader, const char* fragmentShader);
 
+    /** Binds a non-matrix uniform to a value. */
     template<UniformScalar T>
     void bindUniform(std::string name, T* values, GLsizei count = 1);
+    /** Binds a uniform of type matrix to a value. */
     template<UniformScalar T>
     void bindUniform(std::string name, T* values, GLboolean transpose, GLsizei count = 1);
-
+    /**
+     * @param name name of attribute variable.
+     * @returns index of an attribute variable.
+     */
+    GLint getAttribIndex(std::string name);
     void registerGLSetting(callback_t set, callback_t unset = nullptr);
-
     /** Binds shader to ogl context and enables/sets attributes/uniforms. */
     void use();
     /** Unbinds shader from ogl context. */
     void disable();
 
   private:
+    /** Binds a uniform variable to a value.
+     *
+     * @param name variable name in GLSL Shader program.
+     * @param values value to bind uniform to. The value will be evaluated when @ref
+     * ShaderProgram#use is called. When setting non-scalar uniforms should point to first address
+     * of tightly packed values, same for when setting uniform arrays.
+     * @param count for uniform arrays specifies number of elements to set. Should be 1 for
+     * non-arrays.
+     * @param transpose when setting uniform of matrix type should be @code true @endcode if values
+     * should be read in transposed order. Ignored for non matrix uniforms.
+     */
     template<UniformScalar T>
     void _bindUniform(std::string name, T* values, GLsizei count, GLboolean transpose);
 
@@ -52,7 +68,6 @@ class ShaderProgram {
 };
 
 
-/** Binds a non-matrix uniform to a value. */
 template<UniformScalar T>
 inline void ShaderProgram::bindUniform(std::string name, T* values, GLsizei count)
 {
@@ -60,7 +75,6 @@ inline void ShaderProgram::bindUniform(std::string name, T* values, GLsizei coun
 }
 
 
-/** Binds a uniform of type matrix to a value. */
 template<UniformScalar T>
 inline void ShaderProgram::bindUniform(
     std::string name, T* values, GLboolean transpose, GLsizei count)
@@ -69,16 +83,6 @@ inline void ShaderProgram::bindUniform(
 }
 
 
-/** Binds a uniform variable to a value.
- *
- * @param name variable name in GLSL Shader program.
- * @param values value to bind uniform to. The value will be evaluated when @ref ShaderProgram#use
- * is called. When setting non-scalar uniforms should point to first address of tightly packed
- * values, same for when setting uniform arrays.
- * @param count for uniform arrays specifies number of elements to set. Should be 1 for non-arrays.
- * @param transpose when setting uniform of matrix type should be @code true @endcode if values
- * should be read in transposed order. Ignored for non matrix uniforms.
- */
 template<UniformScalar T>
 inline void ShaderProgram::_bindUniform(
     std::string name, T* values, GLsizei count, GLboolean transpose)

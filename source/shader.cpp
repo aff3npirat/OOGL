@@ -75,6 +75,12 @@ ShaderProgram::ShaderProgram(const char* vertexShader, const char* fragmentShade
 }
 
 
+GLint ShaderProgram::getAttribIndex(std::string name)
+{
+    return glGetAttribLocation(id, name.c_str());
+}
+
+
 void ShaderProgram::registerGLSetting(callback_t set, callback_t unset = nullptr)
 {
     oglSetting = set;
