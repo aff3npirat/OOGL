@@ -9,6 +9,9 @@
 #include <type_traits>
 
 
+GLuint compileShader(const char* vertexSource, const char* fragmentSource);
+
+
 template<typename T> concept UniformScalar =
     (std::is_same<T, GLint>::value || std::is_same<T, GLfloat>::value ||
      std::is_same<T, GLuint>::value || std::is_same<T, GLboolean>::value);
@@ -16,8 +19,6 @@ template<typename T> concept UniformScalar =
 /** Provides simplified access to OGL shader API. */
 class ShaderProgram {
   public:
-    static GLuint compileShader(const char* vertexSource, const char* fragmentSource);
-
     ShaderProgram(const char* vertexShader, const char* fragmentShader);
 
     void use();

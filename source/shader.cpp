@@ -1,7 +1,7 @@
 #include "shader.h"
 
 
-GLuint ShaderProgram::compileShader(const char* vertexSource, const char* fragmentSource)
+GLuint compileShader(const char* vertexSource, const char* fragmentSource)
 {
     printf("Compiling vertex shader\n");
     GLuint vertexID = glCreateShader(GL_VERTEX_SHADER);
