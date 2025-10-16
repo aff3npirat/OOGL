@@ -73,3 +73,40 @@ ShaderProgram::ShaderProgram(const char* vertexShader, const char* fragmentShade
 
     delete[] nameBuf;
 }
+
+
+void ShaderProgram::registerGLSetting(callback_t set, callback_t unset = nullptr)
+{
+    oglSetting = set;
+    unsetOGLSetting = unset;
+}
+
+
+void ShaderProgram::use()
+{
+    glUseProgram(id);
+
+    oglSetting();
+
+    for (int i = 0; i < numAttribs; i++) {
+        glEnableVertexAttribArray(i);
+    }
+
+    for (std::function<void()> setter : uniformSetters) {
+        setter();
+    }
+}
+
+
+void ShaderProgram::disable()
+{
+    for (int i = 0; i < numAttribs; i++) {
+        glDisableVertexAttribArray(i);
+    }
+
+    if (unsetOGLSetting != nullptr) {
+        unsetOGLSetting();
+    }
+
+    glUseProgram(0);
+}

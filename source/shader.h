@@ -9,12 +9,17 @@
 #include <type_traits>
 
 
-GLuint compileShader(const char* vertexSource, const char* fragmentSource);
-
+namespace {
+typedef void (*callback_t)();
 
 template<typename T> concept UniformScalar =
     (std::is_same<T, GLint>::value || std::is_same<T, GLfloat>::value ||
-     std::is_same<T, GLuint>::value || std::is_same<T, GLboolean>::value);
+        std::is_same<T, GLuint>::value || std::is_same<T, GLboolean>::value);
+}  // namespace
+
+
+GLuint compileShader(const char* vertexSource, const char* fragmentSource);
+
 
 /** Provides simplified access to OGL shader API. */
 class ShaderProgram {
@@ -26,7 +31,11 @@ class ShaderProgram {
     template<UniformScalar T>
     void bindUniform(std::string name, T* values, GLboolean transpose, GLsizei count = 1);
 
+    void registerGLSetting(callback_t set, callback_t unset = nullptr);
+
+    /** Binds shader to ogl context and enables/sets attributes/uniforms. */
     void use();
+    /** Unbinds shader from ogl context. */
     void disable();
 
   private:
@@ -36,6 +45,8 @@ class ShaderProgram {
     GLuint id;
     unsigned int numAttribs;
     std::vector<std::function<void()>> uniformSetters;
+    callback_t oglSetting;
+    callback_t unsetOGLSetting;
     std::map<std::string, std::pair<GLint, GLuint>>
         uniformLookup;  // Maps name to (location, index)
 };
