@@ -71,6 +71,9 @@ ShaderProgram::ShaderProgram(const char* vertexShader, const char* fragmentShade
         uniformLookup[name] = std::make_pair(location, i);
     }
 
+    oglSetting = nullptr;
+    unsetOGLSetting = nullptr;
+
     delete[] nameBuf;
 }
 
@@ -98,12 +101,14 @@ void ShaderProgram::use()
 {
     glUseProgram(id);
 
-    oglSetting();
+    if (oglSetting != nullptr) {
+        oglSetting();
+    }
 
     for (int i = 0; i < numAttribs; i++) {
         glEnableVertexAttribArray(i);
     }
-
+    
     for (std::function<void()> setter : uniformSetters) {
         setter();
     }
