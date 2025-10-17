@@ -105,7 +105,7 @@ void ShaderProgram::use()
         oglSetting();
     }
     
-    for (std::function<void()> setter : uniformSetters) {
+    for (callback_t setter : uniformSetters) {
         setter();
     }
 }

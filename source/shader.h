@@ -10,7 +10,7 @@
 
 
 namespace {
-typedef void (*callback_t)();
+typedef std::function<void()> callback_t;
 
 template<typename T> concept UniformScalar =
     (std::is_same<T, GLint>::value || std::is_same<T, GLfloat>::value ||
@@ -63,13 +63,13 @@ class ShaderProgram {
      * @returns lambda expression which will send values to uniform variable on call.
      */
     template<FloatConvertable T>
-    std::function<void()> uniformCallback(
+    callback_t uniformCallback(
         GLint location, GLenum type, const T* values, GLsizei count);
     template<IntConvertable T>
-    std::function<void()> uniformCallback(
+    callback_t uniformCallback(
         GLint location, GLenum type, const T* values, GLsizei count);
     template<UIntConvertable T>
-    std::function<void()> uniformCallback(
+    callback_t uniformCallback(
         GLint location, GLenum type, const T* values, GLsizei count);
     /** Binds a uniform of matrix type to a value.
      *
@@ -79,12 +79,12 @@ class ShaderProgram {
      *
      * @returns @sa uniformCallback
      */
-    std::function<void()> uniformMatrixCallback(
+    callback_t uniformMatrixCallback(
         GLint location, GLenum type, const GLfloat* values, GLsizei count, GLboolean transpose);
 
     GLuint id;
     unsigned int numAttribs;
-    std::vector<std::function<void()>> uniformSetters;
+    std::vector<callback_t> uniformSetters;
     callback_t oglSetting;
     callback_t unsetOGLSetting;
     std::map<std::string, std::pair<GLint, GLuint>>
@@ -101,7 +101,7 @@ inline void ShaderProgram::bindUniform(std::string name, const T* values, GLsize
     GLenum type;
     glGetActiveUniform(id, index, 0, nullptr, nullptr, &type, nullptr);
 
-    std::function<void()> callback = uniformCallback<T>(location, type, values, count);
+    callback_t callback = uniformCallback<T>(location, type, values, count);
 
     uniformSetters.push_back(callback);
 }
@@ -116,14 +116,14 @@ inline void ShaderProgram::bindUniform(
     GLenum type;
     glGetActiveUniform(id, index, 0, nullptr, nullptr, &type, nullptr);
 
-    std::function<void()> callback = uniformMatrixCallback(location, type, values, count, transpose);
+    callback_t callback = uniformMatrixCallback(location, type, values, count, transpose);
 
     uniformSetters.push_back(callback);
 }
 
 
 template<IntConvertable T>
-inline std::function<void()> ShaderProgram::uniformCallback(
+inline callback_t ShaderProgram::uniformCallback(
     GLint location, GLenum type, const T* values, GLsizei count)
 {
     void (*callback)(GLint, GLsizei, const GLint*);
@@ -143,7 +143,7 @@ inline std::function<void()> ShaderProgram::uniformCallback(
 
 
 template<FloatConvertable T>
-inline std::function<void()> ShaderProgram::uniformCallback(
+inline callback_t ShaderProgram::uniformCallback(
     GLint location, GLenum type, const T* values, GLsizei count)
 {
     void (*callback)(GLint, GLsizei, const GLfloat*);
@@ -162,7 +162,7 @@ inline std::function<void()> ShaderProgram::uniformCallback(
 
 
 template<UIntConvertable T>
-inline std::function<void()> ShaderProgram::uniformCallback(
+inline callback_t ShaderProgram::uniformCallback(
     GLint location, GLenum type, const T* values, GLsizei count)
 {
     void (*callback)(GLint, GLsizei, const GLuint*);
@@ -184,7 +184,7 @@ inline std::function<void()> ShaderProgram::uniformCallback(
 }
 
 
-inline std::function<void()> ShaderProgram::uniformMatrixCallback(
+inline callback_t ShaderProgram::uniformMatrixCallback(
     GLint location, GLenum type, const GLfloat* values, GLsizei count, GLboolean transpose)
 {
     void (*callback)(GLint, GLsizei, GLboolean, const GLfloat*);
