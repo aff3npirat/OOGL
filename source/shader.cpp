@@ -104,7 +104,7 @@ void ShaderProgram::use()
     if (oglSetting != nullptr) {
         oglSetting();
     }
-    
+
     for (callback_t setter : uniformSetters) {
         setter();
     }

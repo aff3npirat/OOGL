@@ -14,7 +14,8 @@ bool Textured3D::compare(Textured3D* a, Textured3D* b)
 }
 
 
-Textured3D::Textured3D(BufferView *vertexBuffer, GLfloat *vertices, BufferView *uvBuffer, GLfloat *uvs, GLuint texture, unsigned int numVertex)
+Textured3D::Textured3D(BufferView* vertexBuffer, GLfloat* vertices, BufferView* uvBuffer,
+    GLfloat* uvs, GLuint texture, unsigned int numVertex)
 {
     this->vertices = vertices;
     this->vertexBuffer = vertexBuffer;
@@ -27,8 +28,8 @@ Textured3D::Textured3D(BufferView *vertexBuffer, GLfloat *vertices, BufferView *
 
 void Textured3D::insert(unsigned int offset)
 {
-    vertexBuffer->insert(vertices, numVertex*3, offset*3);
-    uvBuffer->insert(uvs, numVertex*2, offset*2);
+    vertexBuffer->insert(vertices, numVertex * 3, offset * 3);
+    uvBuffer->insert(uvs, numVertex * 2, offset * 2);
 }
 
 
@@ -56,7 +57,7 @@ void Textured3D::Batch::exit()
 }
 
 
-void Textured3D::Batch::initialize(Textured3D *model)
+void Textured3D::Batch::initialize(Textured3D* model)
 {
     texture = model->getTexture();
 }

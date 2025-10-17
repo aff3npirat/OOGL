@@ -63,14 +63,11 @@ class ShaderProgram {
      * @returns lambda expression which will send values to uniform variable on call.
      */
     template<FloatConvertable T>
-    callback_t uniformCallback(
-        GLint location, GLenum type, const T* values, GLsizei count);
+    callback_t uniformCallback(GLint location, GLenum type, const T* values, GLsizei count);
     template<IntConvertable T>
-    callback_t uniformCallback(
-        GLint location, GLenum type, const T* values, GLsizei count);
+    callback_t uniformCallback(GLint location, GLenum type, const T* values, GLsizei count);
     template<UIntConvertable T>
-    callback_t uniformCallback(
-        GLint location, GLenum type, const T* values, GLsizei count);
+    callback_t uniformCallback(GLint location, GLenum type, const T* values, GLsizei count);
     /** Binds a uniform of matrix type to a value.
      *
      * @param location, type, values, count @sa uniformCallback

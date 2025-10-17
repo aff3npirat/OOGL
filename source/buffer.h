@@ -1,13 +1,13 @@
 #pragma once
 
-#include <utility>
-
 #include <GL/Glew.h>
+
+#include <utility>
 
 
 /** Wrapper for template to enable duck typing.
- * 
- * Maps an OGL Buffer (by uid) to array of arbitrary type. The actual 
+ *
+ * Maps an OGL Buffer (by id) to array of arbitrary type. The actual
  * type is hidden.
  */
 struct Buffer {
@@ -17,17 +17,18 @@ struct Buffer {
 
         unsigned int size;
         unsigned int byteSize;
-        GLuint uid;
+        GLuint id;
     };
 
     template<typename T>
     struct Implement : public Base {
-        Implement(unsigned int size) {
+        Implement(unsigned int size)
+        {
             values = new T[size];
             this->size = size;
             byteSize = sizeof(T);
 
-            glGenBuffers(1, &uid);
+            glGenBuffers(1, &id);
         }
         ~Implement() { delete[] values; }
 
@@ -37,21 +38,25 @@ struct Buffer {
     };
 
     ~Buffer() { delete ptr; }
-    
+
     /** Allocates new array of size @p size */
-    template<typename T> void init(std::in_place_type_t<T>, unsigned int size) { ptr = new Implement<T>(size); }
-    
+    template<typename T>
+    void init(std::in_place_type_t<T>, unsigned int size)
+    {
+        ptr = new Implement<T>(size);
+    }
+
     /** @returns Size in bytes of single value of array. */
     unsigned int byteSize();
-    
+
     /** @returns Number of values in buffer. */
     unsigned int size();
-    
+
     /** @returns Void pointer to array. */
     void* data();
 
     /** @returns unique OGL id assigned to a GL Buffer Object. */
-    unsigned int uid();
+    unsigned int id();
 
   private:
     Base* ptr;
@@ -59,7 +64,7 @@ struct Buffer {
 
 
 /** Strided access to a @ref Buffer instance.
- * 
+ *
  * Stores a reference to @ref Buffer instance but only has access
  * to a subset of array. The referenced Buffer is accessed in chunks
  * (here called groups) of consecutive elements with a fixed distance
@@ -71,26 +76,28 @@ struct BufferView {
     /**
      * @param buffer @ref Buffer to access.
      * @param stride, vertexSize specifies indices at which @ref Buffer can be accessed.
-     * Buffer is treated as groups of size @p vertexSize and between two consecutive groups are 
+     * Buffer is treated as groups of size @p vertexSize and between two consecutive groups are
      * @p stride number of elements (between first elements of groups, so @p stride - @p vertexSize
      * equals to number of non-group elements between two consecutive groups).
      * @param offset number of elements before first group starts.
      * @param glType macros defined by OGL.
      */
-    BufferView(Buffer* buffer, unsigned int stride, unsigned int offset, unsigned int vertexSize, int glType);
+    BufferView(Buffer* buffer, unsigned int stride, unsigned int offset, unsigned int vertexSize,
+        int glType);
 
     /** Insert values into viewed buffer.
-     * 
+     *
      * Referenced @ref Buffer object must have at least a size of @code
      * (stride * (size/vertexSize)) + offset @endcode .
-     * 
+     *
      * @param values values to insert.
      * @param size number of values to insert. Must be divisible by @code vertexSize @endcode .
      * @param tempOffset additional offset of elements from first group. Can be used
      * to fill referenced @ref Buffer batchwise.
      */
     template<typename T>
-    void insert(T* values, unsigned int size, unsigned int tempOffset) {
+    void insert(T* values, unsigned int size, unsigned int tempOffset)
+    {
         T* first = static_cast<T*>(buffer->data()) + offset + tempOffset;
 
         int idx = 0;
@@ -105,9 +112,9 @@ struct BufferView {
         }
     }
 
-    Buffer* buffer;  /**< Reference to accessed @ref Buffer. */
-    unsigned int stride;  /**< Number of values between consecutive groups. */
-    unsigned int offset;  /**< Number of values before first group. */
-    unsigned int vertexSize;  /**< Size of a group. */
+    Buffer* buffer;          /**< Reference to accessed @ref Buffer. */
+    unsigned int stride;     /**< Number of values between consecutive groups. */
+    unsigned int offset;     /**< Number of values before first group. */
+    unsigned int vertexSize; /**< Size of a group. */
     int glType;
 };
