@@ -87,7 +87,7 @@ unsigned int ShaderProgram::getNumAttribs()
 }
 
 
-void ShaderProgram::registerGLSetting(callback_t set, callback_t unset = nullptr)
+void ShaderProgram::registerGLSetting(callback_t set, callback_t unset)
 {
     oglSetting = set;
     unsetOGLSetting = unset;
