@@ -23,6 +23,8 @@ class Render {
      */
     Render(BufferView* bufferViews, unsigned int size);
     ~Render() { delete[] buffers; }
+    Render(Render& other) = delete;
+    Render& operator=(Render& other) = delete;
 
     /** Stores model reference to render.
      *

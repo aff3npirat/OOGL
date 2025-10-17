@@ -37,7 +37,10 @@ struct Buffer {
         T* values;
     };
 
+    Buffer() = default;
     ~Buffer() { delete ptr; }
+    Buffer(Buffer& other) = delete;
+    Buffer& operator=(Buffer& other) = delete;
 
     /** Allocates new array of size @p size */
     template<typename T>
