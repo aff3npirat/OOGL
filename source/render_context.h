@@ -20,18 +20,19 @@ class Render {
   public:
     /**
      * @param bufferViews each view is linked to specific shader attribute.
-     * @param shaderAttribs shader attributes linked to @p bufferViews .
-     * @param size number of @p bufferViews and @p shaderAttribs . 
+     * @param size number of @p bufferViews /vertex attributes. 
      */
-    Render(BufferView* bufferViews, unsigned int* shaderAttribs, unsigned int size) {
+    Render(BufferView* bufferViews, unsigned int size) {
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
+
+        numAttribs = size;
         
         std::map<GLuint, Buffer*> buffers;
         for (int i = 0; i < size; i++) {
             glBindBuffer(GL_ARRAY_BUFFER, bufferViews[i].buffer->uid());
             glVertexAttribPointer(
-                shaderAttribs[i],
+                i,
                 bufferViews[i].vertexSize,
                 bufferViews[i].glType,
                 GL_FALSE,
@@ -99,10 +100,16 @@ class Render {
         }
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+        for (GLint i = 0; i < numAttribs; i++) {
+            glEnableVertexAttribArray(i);
+        }
         for (int i = 0; i < batches.size(); i++) {
             batches[i].enter();
             glDrawArrays(GL_TRIANGLES, batches[i].offset, batches[i].numVertex);
             batches[i].exit();
+        }
+        for (GLint i = 0; i < numAttribs; i++) {
+            glDisableVertexAttribArray(i);
         }
         glBindVertexArray(0);
     }
@@ -111,5 +118,6 @@ class Render {
     GLuint vao;
     Buffer** buffers;
     unsigned int numBuffers;
+    unsigned int numAttribs;
     std::vector<Model*> models;
 };

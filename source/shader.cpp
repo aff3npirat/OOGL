@@ -104,10 +104,6 @@ void ShaderProgram::use()
     if (oglSetting != nullptr) {
         oglSetting();
     }
-
-    for (int i = 0; i < numAttribs; i++) {
-        glEnableVertexAttribArray(i);
-    }
     
     for (std::function<void()> setter : uniformSetters) {
         setter();
@@ -117,10 +113,6 @@ void ShaderProgram::use()
 
 void ShaderProgram::disable()
 {
-    for (int i = 0; i < numAttribs; i++) {
-        glDisableVertexAttribArray(i);
-    }
-
     if (unsetOGLSetting != nullptr) {
         unsetOGLSetting();
     }

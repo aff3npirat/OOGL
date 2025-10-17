@@ -225,10 +225,8 @@ int main()
         1.0f - 0.335851f};
 
     Textured3D cube(&vbo, &cubeVertices[0], &uvbo, &cubeUvs[0], texture, 36);
-    unsigned int shaderAttribs[2] = {
-        shader.getAttribIndex("vertexPosition_modelspace"), shader.getAttribIndex("uv")};
 
-    Render<Textured3D> context(&attribs[0], &shaderAttribs[0], 2);
+    Render<Textured3D> context(&attribs[0], shader.getNumAttribs());
     context.addModel(&cube);
 
     glClearColor(0.0, 0.0, 0.0, 0.0f);
@@ -237,6 +235,8 @@ int main()
 
     do {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        shader.use();
 
         context.render();
 
