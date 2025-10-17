@@ -24,7 +24,7 @@ GLuint compileShader(const char* vertexSource, const char* fragmentSource)
     checkShader(vertexID);
 
     printf("Compiling fragment shader\n");
-    GLuint fragmentID = glCreateShader(GL_VERTEX_SHADER);
+    GLuint fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentID, 1, &fragmentSource, NULL);
     glCompileShader(fragmentID);
     checkShader(fragmentID);
@@ -41,7 +41,7 @@ GLuint compileShader(const char* vertexSource, const char* fragmentSource)
         std::vector<char> log(logLen + 1);
         GLsizei written;
         glGetProgramInfoLog(programID, logLen, &written, log.data());
-        printf("link error:\n%s", log.data());
+        printf("link error:\n    %s", log.data());
     }
 
     return programID;
