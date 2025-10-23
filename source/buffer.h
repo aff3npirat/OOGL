@@ -22,17 +22,10 @@ struct Buffer {
 
     template<typename T>
     struct Implement : public Base {
-        Implement(unsigned int size)
-        {
-            values = new T[size];
-            this->size = size;
-            byteSize = sizeof(T);
+        Implement(unsigned int size);
+        ~Implement();
 
-            glGenBuffers(1, &id);
-        }
-        ~Implement() { delete[] values; }
-
-        void* getValues() { return (void*)values; }
+        void* getValues();
 
         T* values;
     };
@@ -44,10 +37,7 @@ struct Buffer {
 
     /** Allocates new array of size @p size */
     template<typename T>
-    void init(std::in_place_type_t<T>, unsigned int size)
-    {
-        ptr = new Implement<T>(size);
-    }
+    void init(std::in_place_type_t<T>, unsigned int size);
 
     /** @returns Size in bytes of single value of array. */
     unsigned int byteSize();
@@ -99,21 +89,7 @@ struct BufferView {
      * to fill referenced @ref Buffer batchwise.
      */
     template<typename T>
-    void insert(T* values, unsigned int size, unsigned int tempOffset)
-    {
-        T* first = static_cast<T*>(buffer->data()) + offset + tempOffset;
-
-        int idx = 0;
-        int stridedIdx = 0;
-        while (idx < size) {
-            for (int j = 0; j < vertexSize; j++) {
-                first[stridedIdx + j] = values[idx + j];
-            }
-
-            idx += vertexSize;
-            stridedIdx += stride;
-        }
-    }
+    void insert(T* values, unsigned int size, unsigned int tempOffset);
 
     Buffer* buffer;          /**< Reference to accessed @ref Buffer. */
     unsigned int stride;     /**< Number of values between consecutive groups. */
@@ -121,3 +97,6 @@ struct BufferView {
     unsigned int vertexSize; /**< Size of a group. */
     int glType;
 };
+
+
+#include "buffer.tpp"
