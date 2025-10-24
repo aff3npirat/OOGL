@@ -2,7 +2,6 @@
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
 #include <string.h>
-#include <testsuite.h>
 
 #include <cstdio>
 #include <fstream>
@@ -12,11 +11,11 @@
 #include <sstream>
 #include <vector>
 
-#include "buffer.h"
 #include "cmake_config.h"
-#include "model.h"
-#include "render_context.h"
-#include "shader.h"
+#include "source/buffer.h"
+#include "source/model.h"
+#include "source/render_context.h"
+#include "source/shader.h"
 
 
 int init_glfw()
@@ -122,8 +121,8 @@ GLuint loadBMP_custom(const char* imagepath)
 
     // Some BMP files are misformatted, guess missing information
     if (imageSize == 0)
-        imageSize = width * height * 3;  // 3 : one byte for each Red, Green and Blue component
-    if (dataPos == 0) dataPos = 54;      // The BMP header is done that way
+        imageSize = width * height * 3;    // 3 : one byte for each Red, Green and Blue component
+    if (dataPos == 0) dataPos = 54;        // The BMP header is done that way
 
     // Create a buffer
     data = new unsigned char[imageSize];
