@@ -78,13 +78,13 @@ ShaderProgram::ShaderProgram(const char* vertexShader, const char* fragmentShade
 }
 
 
-GLint ShaderProgram::getAttribIndex(std::string name)
+GLint ShaderProgram::getAttribIndex(std::string name) const
 {
     return glGetAttribLocation(id, name.c_str());
 }
 
 
-unsigned int ShaderProgram::getNumAttribs()
+unsigned int ShaderProgram::getNumAttribs() const
 {
     return numAttribs;
 }
@@ -97,7 +97,7 @@ void ShaderProgram::registerGLSetting(callback_t set, callback_t unset)
 }
 
 
-void ShaderProgram::use()
+void ShaderProgram::use() const
 {
     glUseProgram(id);
 
@@ -111,7 +111,7 @@ void ShaderProgram::use()
 }
 
 
-void ShaderProgram::disable()
+void ShaderProgram::disable() const
 {
     if (unsetOGLSetting != nullptr) {
         unsetOGLSetting();

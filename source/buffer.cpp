@@ -12,25 +12,25 @@ BufferView::BufferView(
 }
 
 
-unsigned int Buffer::byteSize()
+unsigned int Buffer::byteSize() const
 {
     return ptr->byteSize;
 }
 
 
-unsigned int Buffer::size()
+unsigned int Buffer::size() const
 {
     return ptr->size;
 }
 
 
-void* Buffer::data()
+void* Buffer::data() const
 {
     return ptr->getValues();
 }
 
 
-unsigned int Buffer::id()
+unsigned int Buffer::id() const
 {
     return ptr->id;
 }

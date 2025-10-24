@@ -28,13 +28,13 @@ class ShaderProgram {
      * @param name name of attribute variable.
      * @returns index of an attribute variable.
      */
-    GLint getAttribIndex(std::string name);
-    unsigned int getNumAttribs();
+    GLint getAttribIndex(std::string name) const;
+    unsigned int getNumAttribs() const;
     void registerGLSetting(callback_t set, callback_t unset = nullptr);
     /** Binds shader to ogl context and enables/sets attributes/uniforms. */
-    void use();
+    void use() const;
     /** Unbinds shader from ogl context. */
-    void disable();
+    void disable() const;
 
   private:
     GLuint id;

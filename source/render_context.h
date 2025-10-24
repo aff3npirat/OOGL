@@ -21,10 +21,10 @@ class Render {
      * @param bufferViews each view is linked to specific shader attribute.
      * @param size number of @p bufferViews /vertex attributes.
      */
-    Render(BufferView* bufferViews, unsigned int size);
+    Render(const BufferView* bufferViews, unsigned int size);
     ~Render() { delete[] buffers; }
-    Render(Render& other) = delete;
-    Render& operator=(Render& other) = delete;
+    Render(const Render& other) = delete;
+    Render& operator=(const Render& other) = delete;
 
     /** Stores model reference to render.
      *
@@ -32,7 +32,7 @@ class Render {
      * not store any data. All changes to @p model will be rendererd
      * when @ref RenderContext#render is called.
      */
-    void addModel(Model* model);
+    void addModel(const Model* model);
     /** Renders all stored models.
      *
      * Data from all stored models will be transferred to GPU and rendered
@@ -45,7 +45,7 @@ class Render {
     Buffer** buffers;
     unsigned int numBuffers;
     unsigned int numAttribs;
-    std::vector<Model*> models;
+    std::vector<const Model*> models;
 };
 
 

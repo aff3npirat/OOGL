@@ -19,7 +19,7 @@ inline Buffer::Implement<T>::~Implement()
 }
 
 template<typename T>
-inline void* Buffer::Implement<T>::getValues()
+inline void* Buffer::Implement<T>::getValues() const
 {
     return (void*)values;
 }
@@ -31,7 +31,7 @@ inline void Buffer::init(std::in_place_type_t<T>, unsigned int size)
 }
 
 template<typename T>
-inline void BufferView::insert(T* values, unsigned int size, unsigned int tempOffset)
+inline void BufferView::insert(const T* values, unsigned int size, unsigned int tempOffset) const
 {
     T* first = static_cast<T*>(buffer->data()) + offset + tempOffset;
 

@@ -25,14 +25,14 @@ class ModelBase {
          *
          * @param model model to initialize batch from.
          */
-        void initialize(ModelBase* model) {}
+        void initialize(const ModelBase* model) {}
         /** Initializes OGL context such that model can be rendered.
          *
          * For Example binding correct OGL Texture target.
          */
-        void enter() {}
+        void enter() const {}
         /** Reverts changes by @ref exit . */
-        void exit() {}
+        void exit() const {}
 
         unsigned int offset;
         unsigned int numVertex;
@@ -40,14 +40,14 @@ class ModelBase {
 
     virtual ~ModelBase() {};
     /** Insert vertex data into respective buffers. */
-    virtual void insert(unsigned int offset) = 0;
-    virtual unsigned int getNumVertex() = 0;
+    virtual void insert(unsigned int offset) const = 0;
+    virtual unsigned int getNumVertex() const = 0;
     /** Compare two models such that glDraw calls can be minimized.
      *
      * @param a, b models to compare.
      * @returns @code true @endcode if @p b should belong to different @ref Batch than @p a .
      */
-    static bool compare(ModelBase* a, ModelBase* b);
+    static bool compare(const ModelBase* a, const ModelBase* b);
 };
 
 
@@ -58,15 +58,15 @@ class Textured3D : public ModelBase {
     struct Batch : public ModelBase::Batch {
         using ModelBase::Batch::Batch;
         /** Binds correct texture to texture target. */
-        void enter();
+        void enter() const;
         /** Removes texture binding. */
-        void exit();
-        void initialize(Textured3D* model);
+        void exit() const;
+        void initialize(const Textured3D* model);
 
         GLuint texture;
     };
 
-    static bool compare(Textured3D* a, Textured3D* b);
+    static bool compare(const Textured3D* a, const Textured3D* b);
 
     /**
      * @param vertexBuffer, uvBuffer access to buffer holding vertex/uv data.
@@ -77,10 +77,10 @@ class Textured3D : public ModelBase {
     Textured3D(BufferView* vertexBuffer, GLfloat* vertices, BufferView* uvBuffer, GLfloat* uvs,
         GLuint texture, unsigned int numVertex);
 
-    void insert(unsigned int offset);
-    unsigned int getNumVertex();
+    void insert(unsigned int offset) const;
+    unsigned int getNumVertex() const;
     /** @returns ID of used texture. */
-    GLuint getTexture();
+    GLuint getTexture() const;
 
   private:
     GLfloat* vertices;

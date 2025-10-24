@@ -4,14 +4,14 @@
 
 
 template<IsModel Model>
-inline void Render<Model>::addModel(Model* model)
+inline void Render<Model>::addModel(const Model* model)
 {
     models.push_back(model);
 }
 
 
 template<IsModel Model>
-inline Render<Model>::Render(BufferView* bufferViews, unsigned int size)
+inline Render<Model>::Render(const BufferView* bufferViews, unsigned int size)
 {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);

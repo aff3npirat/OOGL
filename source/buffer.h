@@ -13,7 +13,7 @@
 struct Buffer {
     struct Base {
         virtual ~Base() {};
-        virtual void* getValues() = 0;
+        virtual void* getValues() const = 0;
 
         unsigned int size;
         unsigned int byteSize;
@@ -25,7 +25,7 @@ struct Buffer {
         Implement(unsigned int size);
         ~Implement();
 
-        void* getValues();
+        void* getValues() const;
 
         T* values;
     };
@@ -40,16 +40,16 @@ struct Buffer {
     void init(std::in_place_type_t<T>, unsigned int size);
 
     /** @returns Size in bytes of single value of array. */
-    unsigned int byteSize();
+    unsigned int byteSize() const;
 
     /** @returns Number of values in buffer. */
-    unsigned int size();
+    unsigned int size() const;
 
     /** @returns Void pointer to array. */
-    void* data();
+    void* data() const;
 
     /** @returns unique OGL id assigned to a GL Buffer Object. */
-    unsigned int id();
+    unsigned int id() const;
 
   private:
     Base* ptr;
@@ -89,7 +89,7 @@ struct BufferView {
      * to fill referenced @ref Buffer batchwise.
      */
     template<typename T>
-    void insert(T* values, unsigned int size, unsigned int tempOffset);
+    void insert(const T* values, unsigned int size, unsigned int tempOffset) const;
 
     Buffer* buffer;          /**< Reference to accessed @ref Buffer. */
     unsigned int stride;     /**< Number of values between consecutive groups. */
