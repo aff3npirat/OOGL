@@ -5,7 +5,7 @@ BufferView::BufferView(
     Buffer* buffer, unsigned int stride, unsigned int offset, unsigned int vertexSize, int glType)
 {
     this->buffer = buffer;
-    this->stride = stride;
+    this->stride = (stride == 0) ? vertexSize : stride;
     this->offset = offset;
     this->vertexSize = vertexSize;
     this->glType = glType;
