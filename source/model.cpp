@@ -1,63 +1,65 @@
 #include "model.h"
 
 
-ModelBase::Batch::Batch(unsigned int offset, unsigned int numVertex)
+Mesh::Mesh(
+    const BufferView** buffers, const VData** attribs, unsigned int size, unsigned int numVertex)
 {
-    this->offset = offset;
+    this->buffers = buffers;
+    this->attribs = attribs;
     this->numVertex = numVertex;
+    this->numAttribs = size;
 }
 
 
-bool Textured3D::compare(const Textured3D* a, const Textured3D* b)
+void Mesh::insert(unsigned int offset) const
 {
-    return a->texture < b->texture;
+    for (int i = 0; i < numAttribs; i++) {
+        attribs[i]->insert(buffers[i], offset * attribs[i]->getAttribSize());
+    }
 }
 
 
-Textured3D::Textured3D(BufferView* vertexBuffer, GLfloat* vertices, BufferView* uvBuffer,
-    GLfloat* uvs, GLuint texture, unsigned int numVertex)
-{
-    this->vertices = vertices;
-    this->vertexBuffer = vertexBuffer;
-    this->uvs = uvs;
-    this->uvBuffer = uvBuffer;
-    this->texture = texture;
-    this->numVertex = numVertex;
-}
-
-
-void Textured3D::insert(unsigned int offset) const
-{
-    vertexBuffer->insert(vertices, numVertex * 3, offset * 3);
-    uvBuffer->insert(uvs, numVertex * 2, offset * 2);
-}
-
-
-unsigned int Textured3D::getNumVertex() const
+unsigned int Mesh::getNumVertex() const
 {
     return numVertex;
 }
 
 
-GLuint Textured3D::getTexture() const
+TexturedMesh::TexturedMesh(const BufferView** buffers, const VData** attribs, unsigned int size,
+    unsigned int numVertex, GLuint texture)
+    : Mesh(buffers, attribs, size, numVertex)
+{
+    this->texture = texture;
+}
+
+
+GLuint TexturedMesh::getTexture() const
 {
     return texture;
 }
 
 
-void Textured3D::Batch::enter() const
+Textured3DModel::Textured3DModel(
+    GLfloat* vertices, GLfloat* uvs, unsigned int numVertex, GLuint texture)
 {
-    glBindTexture(GL_TEXTURE_2D, texture);
+    this->vertices = vertices;
+    this->uvs = uvs;
+    this->numVertex = numVertex;
+    this->texture = texture;
 }
 
 
-void Textured3D::Batch::exit() const
+TexturedMesh Textured3DModel::getMesh(
+    const BufferView* vertexBuffer, const BufferView* uvBuffer) const
 {
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
+    // TODO fix memory issues
+    const BufferView** buffers = new const BufferView*[2];
+    buffers[0] = vertexBuffer;
+    buffers[1] = uvBuffer;
 
+    const VData** attribs = new const VData*[2];
+    attribs[0] = new VData(vertices, numVertex * 3, 3);
+    attribs[1] = new VData(uvs, numVertex * 2, 2);
 
-void Textured3D::Batch::initialize(const Textured3D* model)
-{
-    texture = model->getTexture();
+    return TexturedMesh(buffers, attribs, 2, numVertex, texture);
 }

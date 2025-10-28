@@ -224,10 +224,11 @@ int main()
         1.0f - 0.335903f, 0.667969f, 1.0f - 0.671889f, 1.000004f, 1.0f - 0.671847f, 0.667979f,
         1.0f - 0.335851f};
 
-    Textured3D cube(&vbo, &cubeVertices[0], &uvbo, &cubeUvs[0], texture, 36);
+    Textured3DModel cube(&cubeVertices[0], &cubeUvs[0], 36, texture);
 
-    Render<Textured3D> context(&attribs[0], shader.getNumAttribs());
-    context.addModel(&cube);
+    Renderer<TexturedMesh> context(&attribs[0], shader.getNumAttribs());
+    TexturedMesh cubeMesh = cube.getMesh(&vbo, &uvbo);
+    context.addModel(&cubeMesh);
 
     glClearColor(0.0, 0.0, 0.0, 0.0f);
     glEnable(GL_DEPTH_TEST);

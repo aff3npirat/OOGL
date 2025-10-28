@@ -20,8 +20,7 @@ struct Buffer {
         GLuint id;
     };
 
-    template<typename T>
-    struct Implement : public Base {
+    template<typename T> struct Implement : public Base {
         Implement(unsigned int size);
         ~Implement();
 
@@ -36,8 +35,7 @@ struct Buffer {
     Buffer& operator=(Buffer& other) = delete;
 
     /** Allocates new array of size @p size */
-    template<typename T>
-    void init(std::in_place_type_t<T>, unsigned int size);
+    template<typename T> void init(std::in_place_type_t<T>, unsigned int size);
 
     /** @returns Size in bytes of single value of array. */
     unsigned int byteSize() const;
@@ -96,6 +94,35 @@ struct BufferView {
     unsigned int offset;     /**< Number of values before first group. */
     unsigned int vertexSize; /**< Size of a group. */
     int glType;
+};
+
+
+class VData {
+  public:
+    template<typename T> VData(const T* values, unsigned int n, unsigned int size);
+    ~VData();
+
+    void insert(const BufferView* buffer, unsigned int offset) const;
+    unsigned int getAttribSize() const;
+
+  private:
+    struct Base {
+        ~Base() {};
+        virtual void insert(const BufferView* buffer, unsigned int offset) const = 0;
+        unsigned int size;
+    };
+
+    template<typename T> struct Implement : public Base {
+        Implement(const T* values, unsigned int size);
+        ~Implement();
+
+        void insert(const BufferView* buffer, unsigned int offset) const;
+
+        const T* values;
+    };
+
+    Base* ptr;
+    unsigned int attribSize;
 };
 
 
