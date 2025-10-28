@@ -3,13 +3,13 @@
 #include <cstdint>
 
 
-template<class C> void Renderer<C>::addModel(const C* model)
+template<IsMesh M> void Renderer<M>::addModel(const M* mesh)
 {
-    models.push_back(model);
+    toRender.push_back(mesh);
 }
 
 
-template<class C> Renderer<C>::Renderer(const BufferView* bufferViews, unsigned int size)
+template<IsMesh M> Renderer<M>::Renderer(const BufferView* bufferViews, unsigned int size)
 {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);

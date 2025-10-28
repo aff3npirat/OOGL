@@ -1,6 +1,18 @@
 #include "model.h"
 
 
+VData::~VData()
+{
+    delete ptr;
+}
+
+
+void VData::insert(const BufferView* buffer, unsigned int offset) const
+{
+    ptr->insert(buffer, offset * attribSize);
+}
+
+
 Mesh::Mesh(
     const BufferView** buffers, const VData** attribs, unsigned int size, unsigned int numVertex)
 {
@@ -14,7 +26,7 @@ Mesh::Mesh(
 void Mesh::insert(unsigned int offset) const
 {
     for (int i = 0; i < numAttribs; i++) {
-        attribs[i]->insert(buffers[i], offset * attribs[i]->getAttribSize());
+        attribs[i]->insert(buffers[i], offset);
     }
 }
 

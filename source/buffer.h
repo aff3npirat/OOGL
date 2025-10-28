@@ -5,12 +5,29 @@
 #include <utility>
 
 
-/** Wrapper for template to enable duck typing.
- *
- * Maps an OGL Buffer (by id) to array of arbitrary type. The actual
- * type is hidden.
- */
+/// @brief Manages vertex data for OGL Buffer Objects.
 struct Buffer {
+    Buffer() = default;
+    ~Buffer() { delete ptr; }
+    Buffer(Buffer& other) = delete;
+    Buffer& operator=(Buffer& other) = delete;
+
+    /// Allocates memory for @p size values.
+    template<typename T> void init(std::in_place_type_t<T>, unsigned int size);
+
+    /// @returns size in bytes of single value.
+    unsigned int byteSize() const;
+
+    /// @returns number of values in buffer.
+    unsigned int size() const;
+
+    /// @returns void pointer to buffer values
+    void* data() const;
+
+    /// @returns unique OGL id assigned to a GL Buffer Object.
+    unsigned int id() const;
+
+  private:
     struct Base {
         virtual ~Base() {};
         virtual void* getValues() const = 0;
@@ -29,100 +46,44 @@ struct Buffer {
         T* values;
     };
 
-    Buffer() = default;
-    ~Buffer() { delete ptr; }
-    Buffer(Buffer& other) = delete;
-    Buffer& operator=(Buffer& other) = delete;
-
-    /** Allocates new array of size @p size */
-    template<typename T> void init(std::in_place_type_t<T>, unsigned int size);
-
-    /** @returns Size in bytes of single value of array. */
-    unsigned int byteSize() const;
-
-    /** @returns Number of values in buffer. */
-    unsigned int size() const;
-
-    /** @returns Void pointer to array. */
-    void* data() const;
-
-    /** @returns unique OGL id assigned to a GL Buffer Object. */
-    unsigned int id() const;
-
-  private:
     Base* ptr;
 };
 
 
-/** Strided access to a @ref Buffer instance.
- *
- * Stores a reference to @ref Buffer instance but only has access
- * to a subset of array. The referenced Buffer is accessed in chunks
- * (here called groups) of consecutive elements with a fixed distance
- * between two groups. For example the referenced Buffer has 8 elements
- * and a @ref BufferView accesses the groups at indices
- * @code G1=(0, 1, 2), G2=(5, 6, 7) @endcode .
- */
+/// @brief Strided access to a @ref Buffer instance.
+/// Stores a reference to @ref Buffer instance but only has access
+/// to a subset of buffer. The referenced buffer is accessed in chunks
+/// (here called groups) of consecutive elements with a fixed distance
+/// between two groups. For example buffer has 8 elements
+/// and a @ref BufferView accesses the groups at indices
+/// @code G1=(0, 1, 2), G2=(5, 6, 7) @endcode .
 struct BufferView {
-    /**
-     * @param buffer @ref Buffer to access.
-     * @param stride, vertexSize specifies indices at which @ref Buffer can be accessed.
-     * Buffer is treated as groups of size @p vertexSize and between two consecutive groups are
-     * @p stride number of elements (between first elements of groups, so @p stride - @p vertexSize
-     * equals to number of non-group elements between two consecutive groups).
-     * @param offset number of elements before first group starts.
-     * @param glType macros defined by OGL.
-     */
+    /// @param buffer @ref Buffer to access.
+    /// @param stride, vertexSize specifies indices at which @ref Buffer can be accessed.
+    /// Buffer is treated as groups of size @p vertexSize and between two consecutive groups are
+    /// @p stride number of elements (between first elements of groups, so @p stride - @p vertexSize
+    /// equals to number of non-group elements between two consecutive groups).
+    /// @param offset number of elements before first group should start.
+    /// @param glType OGL Macro specifying type.
     BufferView(Buffer* buffer, unsigned int stride, unsigned int offset, unsigned int vertexSize,
         int glType);
 
-    /** Insert values into viewed buffer.
-     *
-     * Referenced @ref Buffer object must have at least a size of @code
-     * (stride * (size/vertexSize)) + offset @endcode .
-     *
-     * @param values values to insert.
-     * @param size number of values to insert. Must be divisible by @code vertexSize @endcode .
-     * @param tempOffset additional offset of elements from first group. Can be used
-     * to fill referenced @ref Buffer batchwise.
-     */
+    /// @brief Inserts values into referenced @ref Buffer.
+    /// Insertes values at indices specified by stride, vertexSize, offset.
+    /// Referenced @ref Buffer object must have at least a size of @code
+    /// (stride * (size/vertexSize)) + offset @endcode .
+    /// @param values values to insert.
+    /// @param size number of values to insert. Must be divisible by @code vertexSize @endcode .
+    /// @param tempOffset additional offset of elements from first group. Can be used
+    /// to fill referenced @ref Buffer in batches.
     template<typename T>
     void insert(const T* values, unsigned int size, unsigned int tempOffset) const;
 
-    Buffer* buffer;          /**< Reference to accessed @ref Buffer. */
-    unsigned int stride;     /**< Number of values between consecutive groups. */
-    unsigned int offset;     /**< Number of values before first group. */
-    unsigned int vertexSize; /**< Size of a group. */
+    Buffer* buffer;
+    unsigned int stride;
+    unsigned int offset;
+    unsigned int vertexSize;
     int glType;
-};
-
-
-class VData {
-  public:
-    template<typename T> VData(const T* values, unsigned int n, unsigned int size);
-    ~VData();
-
-    void insert(const BufferView* buffer, unsigned int offset) const;
-    unsigned int getAttribSize() const;
-
-  private:
-    struct Base {
-        ~Base() {};
-        virtual void insert(const BufferView* buffer, unsigned int offset) const = 0;
-        unsigned int size;
-    };
-
-    template<typename T> struct Implement : public Base {
-        Implement(const T* values, unsigned int size);
-        ~Implement();
-
-        void insert(const BufferView* buffer, unsigned int offset) const;
-
-        const T* values;
-    };
-
-    Base* ptr;
-    unsigned int attribSize;
 };
 
 

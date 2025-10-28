@@ -6,9 +6,9 @@
 template<> void Renderer<Mesh>::render()
 {
     unsigned int numVertex = 0;
-    for (int i = 0; i < models.size(); i++) {
-        models[i]->insert(numVertex);
-        numVertex += models[i]->getNumVertex();
+    for (int i = 0; i < toRender.size(); i++) {
+        toRender[i]->insert(numVertex);
+        numVertex += toRender[i]->getNumVertex();
     }
 
     glBindVertexArray(vao);
@@ -39,23 +39,23 @@ struct TextureBatch {
 
 template<> void Renderer<TexturedMesh>::render()
 {
-    std::sort(models.begin(), models.end(), [](const TexturedMesh* a, const TexturedMesh* b) {
+    std::sort(toRender.begin(), toRender.end(), [](const TexturedMesh* a, const TexturedMesh* b) {
         return a->getTexture() <= b->getTexture();
     });
 
     std::vector<TextureBatch> batches;
-    batches.emplace_back(0, models[0]->getNumVertex(), models[0]->getTexture());
-    models[0]->insert(0);
+    batches.emplace_back(0, toRender[0]->getNumVertex(), toRender[0]->getTexture());
+    toRender[0]->insert(0);
 
     TextureBatch* currBatch = &batches[0];
-    for (int i = 1; i < models.size(); i++) {
-        if (models[i]->getTexture() != models[i - 1]->getTexture()) {
-            batches.emplace_back(currBatch->numVertex, 0, models[i]->getTexture());
+    for (int i = 1; i < toRender.size(); i++) {
+        if (toRender[i]->getTexture() != toRender[i - 1]->getTexture()) {
+            batches.emplace_back(currBatch->numVertex, 0, toRender[i]->getTexture());
             currBatch = &batches.back();
         }
 
-        models[i]->insert(currBatch->numVertex);
-        currBatch->numVertex += models[i]->getNumVertex();
+        toRender[i]->insert(currBatch->numVertex);
+        currBatch->numVertex += toRender[i]->getNumVertex();
     }
 
     glBindVertexArray(vao);

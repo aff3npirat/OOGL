@@ -34,21 +34,3 @@ unsigned int Buffer::id() const
 {
     return ptr->id;
 }
-
-
-VData::~VData()
-{
-    delete ptr;
-}
-
-
-void VData::insert(const BufferView* buffer, unsigned int offset) const
-{
-    ptr->insert(buffer, offset);
-}
-
-
-unsigned int VData::getAttribSize() const
-{
-    return attribSize;
-}

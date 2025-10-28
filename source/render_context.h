@@ -11,35 +11,30 @@
 #include "model.h"
 
 
-/** Manages VAO initialization and data transfer to GPU. */
-template<class C>
-class Renderer {
+template<class M> concept IsMesh = std::is_base_of<Mesh, M>::value;
+
+/// @brief Manages VAO initialization and vertex attribute data transfer to OGL Buffer Objects.
+/// @tparam M mesh to use. For Example use @ref TexturedMesh to render meshes with texture.
+template<IsMesh M> class Renderer {
   public:
-    /**
-     * @param bufferViews each view is linked to specific shader attribute.
-     * @param size number of @p bufferViews /vertex attributes.
-     */
+    /// @param bufferViews specifies indices where vertex attribute values are. Element at index i
+    /// corresponds to Vertexshader attribute with index @code i @endcode .
+    /// @param size number of @p bufferViews .
     Renderer(const BufferView* bufferViews, unsigned int size);
     ~Renderer() { delete[] buffers; }
     Renderer(const Renderer& other) = delete;
     Renderer& operator=(const Renderer& other) = delete;
 
-    /** Stores model reference to render.
-     *
-     * This Method does not render any models and also does
-     * not store any data. All changes to @p model will be rendererd
-     * when @ref RenderContext#render is called.
-     */
-    void addModel(const C* model);
-    /** Renders all stored models.
-     *
-     * Data from all stored models will be transferred to GPU and rendered
-     * in specific order to minimize glDraw calls.
-     */
+    /// @brief Adds a @ref Mesh to be rendered.
+    /// This Method does not modifies any data and also does. All changes to @p mesh will be
+    /// rendererd when @ref RenderContext#render is called.
+    void addModel(const M* mesh);
+    /// @brief Renders all stored meshes.
+    /// Data from all stored meshes will be transferred to OGL Buffer Objects and rendered.
     void render();
 
   protected:
-    std::vector<const C*> models;
+    std::vector<const M*> toRender;
     GLuint vao;
     Buffer** buffers;
     unsigned int numBuffers;
@@ -47,7 +42,9 @@ class Renderer {
 };
 
 
+/// @brief renders all meshes with single glDraw call.
 template<> void Renderer<Mesh>::render();
+/// @brief renders all meshes and minimizes glDraw calls.
 template<> void Renderer<TexturedMesh>::render();
 
 #include "render_context.tpp"
