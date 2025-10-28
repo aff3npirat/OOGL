@@ -14,16 +14,12 @@ struct Buffer {
 
     /// Allocates memory for @p size values.
     template<typename T> void init(std::in_place_type_t<T>, unsigned int size);
-
     /// @returns size in bytes of single value.
     unsigned int byteSize() const;
-
     /// @returns number of values in buffer.
     unsigned int size() const;
-
     /// @returns void pointer to buffer values
     void* data() const;
-
     /// @returns unique OGL id assigned to a GL Buffer Object.
     unsigned int id() const;
 
@@ -67,7 +63,6 @@ struct BufferView {
     /// @param glType OGL Macro specifying type.
     BufferView(Buffer* buffer, unsigned int stride, unsigned int offset, unsigned int vertexSize,
         int glType);
-
     /// @brief Inserts values into referenced @ref Buffer.
     /// Insertes values at indices specified by stride, vertexSize, offset.
     /// Referenced @ref Buffer object must have at least a size of @code

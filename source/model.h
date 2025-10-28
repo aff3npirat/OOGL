@@ -53,11 +53,11 @@ class Mesh {
     /// numVertex vertices.
     Mesh(const BufferView** buffers, const VData** attribs, unsigned int size,
         unsigned int numVertex);
-
     /// @brief Inserts each vertex attribute into corresponding @ref Buffer .
     /// @param offset offset of first value for each vertex attribute. Offset is specified in
     /// vertices not array values.
     void insert(unsigned int offset) const;
+    
     unsigned int getNumVertex() const;
 
   private:

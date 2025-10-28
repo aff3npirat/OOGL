@@ -22,7 +22,6 @@ class ShaderProgram {
     /// @param vertexShader, fragmentShader null terminated string containing shader code.
     ShaderProgram(const char* vertexShader, const char* fragmentShader);
 
-
     /// @brief Binds a non-matrix uniform to a value.
     /// Creates a binding between @p values and uniform assigned to @name. If possible values are
     /// converted to type matching uniform variable.
@@ -38,17 +37,17 @@ class ShaderProgram {
     /// @endcode values are transferred to uniform in transposed order.
     void bindUniform(
         std::string name, GLboolean transpose, const GLfloat* values, GLsizei count = 1);
+    void registerGLSetting(callback_t set, callback_t unset = nullptr);
+    /// Binds shader to ogl context and sets uniforms to bound values.
+    void use() const;
+    /// Unbinds shader from ogl context.
+    void disable() const;
 
     /// @brief Returns index of vertex attribute.
     /// @param name of vertex attribute.
     GLint getAttribIndex(std::string name) const;
     /// Returns number of vertex attributes.
     unsigned int getNumAttribs() const;
-    void registerGLSetting(callback_t set, callback_t unset = nullptr);
-    /// Binds shader to ogl context and sets uniforms to bound values.
-    void use() const;
-    /// Unbinds shader from ogl context.
-    void disable() const;
 
   private:
     GLuint id;
