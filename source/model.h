@@ -31,7 +31,7 @@ class VData {
 
     template<typename T> struct Implement : public Base {
         Implement(const T* values, unsigned int size);
-        ~Implement();
+        ~Implement() {};
 
         void insert(const BufferView* buffer, unsigned int offset) const;
 
@@ -53,11 +53,12 @@ class Mesh {
     /// numVertex vertices.
     Mesh(const BufferView** buffers, const VData** attribs, unsigned int size,
         unsigned int numVertex);
+    ~Mesh();
     /// @brief Inserts each vertex attribute into corresponding @ref Buffer .
     /// @param offset offset of first value for each vertex attribute. Offset is specified in
     /// vertices not array values.
     void insert(unsigned int offset) const;
-    
+
     unsigned int getNumVertex() const;
 
   private:
@@ -71,7 +72,7 @@ class Mesh {
 /// @brief Collection of multiple Vertex Attributes and a texture.
 class TexturedMesh : public Mesh {
   public:
-    /// @copydoc Mesh#Mesh 
+    /// @copydoc Mesh#Mesh
     /// @param texture texture-id.
     TexturedMesh(const BufferView** buffers, const VData** attribs, unsigned int size,
         unsigned int numVertex, GLuint texture);
@@ -97,6 +98,7 @@ class ModelBase {
 class Textured3DModel : public ModelBase {
   public:
     Textured3DModel(GLfloat* vertices, GLfloat* uvs, unsigned int numVertex, GLuint texture);
+    ~Textured3DModel();
 
     void transpose() {};
     void rotate() {};
@@ -108,6 +110,8 @@ class Textured3DModel : public ModelBase {
     GLfloat* uvs;
     GLuint texture;
     unsigned int numVertex;
+    const VData* vertexAttrib;
+    const VData* uvAttrib;
 };
 
 
