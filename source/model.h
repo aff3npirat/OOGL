@@ -31,7 +31,7 @@ class VData {
     struct Base {
         ~Base() {};
         virtual void insert(const BufferView* buffer, unsigned int offset) const = 0;
-        virtual Base* createCopy() const = 0;
+        [[nodiscard]] virtual Base* createCopy() const = 0;
         unsigned int size;
     };
 
@@ -40,7 +40,7 @@ class VData {
         ~Implement() {};
 
         void insert(const BufferView* buffer, unsigned int offset) const;
-        Base* createCopy() const;
+        [[nodiscard]] Base* createCopy() const;
 
         const T* values;
     };
