@@ -69,9 +69,9 @@ Textured3DModel::Textured3DModel(
     GLfloat* vertices, GLfloat* uvs, unsigned int numVertex, GLuint texture)
 {
     this->vertices = new GLfloat[numVertex * 3];
-    std::copy(vertices, vertices + numVertex*3, this->vertices);
+    std::copy(vertices, vertices + numVertex * 3, this->vertices);
     this->uvs = new GLfloat[numVertex * 2];
-    std::copy(uvs, uvs + numVertex*2, this->uvs);
+    std::copy(uvs, uvs + numVertex * 2, this->uvs);
 
     this->numVertex = numVertex;
     this->texture = texture;
@@ -80,7 +80,8 @@ Textured3DModel::Textured3DModel(
 }
 
 
-Textured3DModel::~Textured3DModel() {
+Textured3DModel::~Textured3DModel()
+{
     delete[] vertices;
     delete[] uvs;
     delete vertexAttrib;
