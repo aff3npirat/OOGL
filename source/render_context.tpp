@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <utility>
+
+#include "render_context.h"
 
 
 template<IsMesh M> void Renderer<M>::addModel(const M* mesh)
@@ -38,4 +41,11 @@ template<IsMesh M> Renderer<M>::Renderer(const BufferView* bufferViews, unsigned
         this->buffers[i] = it->second;
         it++;
     }
+}
+
+
+template<IsMesh M>
+inline Renderer<M>::Renderer(std::initializer_list<BufferView> bufferViews)
+    : Renderer<M>::Renderer(bufferViews.begin(), bufferViews.size())
+{
 }

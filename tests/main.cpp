@@ -198,7 +198,6 @@ int main()
 
     BufferView vbo(&buffer, 5, 0, 3, GL_FLOAT);
     BufferView uvbo(&buffer, 5, 3, 2, GL_FLOAT);
-    BufferView attribs[2] = {vbo, uvbo};
 
     GLfloat cubeVertices[36 * 3] = {-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
         1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
@@ -226,7 +225,7 @@ int main()
 
     Textured3DModel cube(&cubeVertices[0], &cubeUvs[0], 36, texture);
 
-    Renderer<TexturedMesh> context(&attribs[0], shader.getNumAttribs());
+    Renderer<TexturedMesh> context({vbo, uvbo});
     TexturedMesh cubeMesh = cube.getMesh(&vbo, &uvbo);
     context.addModel(&cubeMesh);
 

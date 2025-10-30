@@ -6,6 +6,7 @@
 #include <map>
 #include <utility>
 #include <vector>
+#include <initializer_list>
 
 #include "buffer.h"
 #include "model.h"
@@ -21,9 +22,10 @@ template<IsMesh M> class Renderer {
     /// corresponds to Vertexshader attribute with index @code i @endcode .
     /// @param size number of @p bufferViews .
     Renderer(const BufferView* bufferViews, unsigned int size);
+    Renderer(std::initializer_list<BufferView> bufferViews);
     ~Renderer() { delete[] buffers; }
     Renderer(const Renderer& other) = delete;
-    Renderer& operator=(const Renderer& other) = delete;
+    Renderer<M>& operator=(const Renderer& other) = delete;
 
     /// @brief Adds a @ref Mesh to be rendered.
     /// This Method does not modifies any data and also does. All changes to @p mesh will be
