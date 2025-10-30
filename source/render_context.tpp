@@ -6,9 +6,9 @@
 #include "render_context.h"
 
 
-template<IsMesh M> void Renderer<M>::addModel(const M* mesh)
+template<IsMesh M> void Renderer<M>::addModel(M& mesh)
 {
-    toRender.push_back(mesh);
+    toRender.push_back(std::move(mesh));
 }
 
 

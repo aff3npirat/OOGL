@@ -227,7 +227,7 @@ int main()
 
     Renderer<TexturedMesh> context({vbo, uvbo});
     TexturedMesh cubeMesh = cube.getMesh(&vbo, &uvbo);
-    context.addModel(&cubeMesh);
+    context.addModel(cubeMesh);
 
     glClearColor(0.0, 0.0, 0.0, 0.0f);
     glEnable(GL_DEPTH_TEST);

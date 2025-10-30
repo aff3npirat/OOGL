@@ -30,13 +30,13 @@ template<IsMesh M> class Renderer {
     /// @brief Adds a @ref Mesh to be rendered.
     /// This Method does not modifies any data and also does. All changes to @p mesh will be
     /// rendererd when @ref RenderContext#render is called.
-    void addModel(const M* mesh);
+    void addModel(M& mesh);
     /// @brief Renders all stored meshes.
     /// Data from all stored meshes will be transferred to OGL Buffer Objects and rendered.
     void render();
 
   protected:
-    std::vector<const M*> toRender;
+    std::vector<M> toRender;
     GLuint vao;
     Buffer** buffers;
     unsigned int numBuffers;

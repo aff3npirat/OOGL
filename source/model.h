@@ -16,6 +16,11 @@ class VData {
     /// @endcode .
     template<typename T> VData(const T* values, unsigned int n, unsigned int size);
     ~VData();
+    VData();
+    VData(const VData& other);
+    VData(VData&& other);
+    VData& operator=(VData other);
+    friend void swap(VData& a, VData& b);
 
     /// @brief Inserts values into referenced buffers.
     /// @param buffer specifies indices to insert values at.
@@ -26,6 +31,7 @@ class VData {
     struct Base {
         ~Base() {};
         virtual void insert(const BufferView* buffer, unsigned int offset) const = 0;
+        virtual Base* createCopy() const = 0;
         unsigned int size;
     };
 
@@ -34,6 +40,7 @@ class VData {
         ~Implement() {};
 
         void insert(const BufferView* buffer, unsigned int offset) const;
+        Base* createCopy() const;
 
         const T* values;
     };
@@ -51,9 +58,13 @@ class Mesh {
     /// @param size number of attributes/buffers.
     /// @param numVertex number of vertices. Each vertex attribute should have values for @p
     /// numVertex vertices.
-    Mesh(const BufferView** buffers, const VData** attribs, unsigned int size,
+    Mesh(const BufferView** buffers, const VData* attribs, unsigned int size,
         unsigned int numVertex);
     ~Mesh();
+    Mesh(const Mesh& other);
+    Mesh(Mesh&& other);
+    Mesh& operator=(Mesh other);
+    friend void swap(Mesh& a, Mesh& b);
     /// @brief Inserts each vertex attribute into corresponding @ref Buffer .
     /// @param offset offset of first value for each vertex attribute. Offset is specified in
     /// vertices not array values.
@@ -61,11 +72,14 @@ class Mesh {
 
     unsigned int getNumVertex() const;
 
+  protected:
+    Mesh();
+
   private:
     unsigned int numVertex;
     unsigned int numAttribs;
     const BufferView** buffers;
-    const VData** attribs;
+    VData* attribs;
 };
 
 
@@ -74,11 +88,18 @@ class TexturedMesh : public Mesh {
   public:
     /// @copydoc Mesh#Mesh
     /// @param texture texture-id.
-    TexturedMesh(const BufferView** buffers, const VData** attribs, unsigned int size,
+    TexturedMesh(const BufferView** buffers, const VData* attribs, unsigned int size,
         unsigned int numVertex, GLuint texture);
+    TexturedMesh(const TexturedMesh& other);
+    TexturedMesh(TexturedMesh&& other);
+    TexturedMesh& operator=(TexturedMesh other);
+    friend void swap(TexturedMesh& a, TexturedMesh& b);
 
     /// returns unique OGL texture-id.
     GLuint getTexture() const;
+
+  protected:
+    TexturedMesh();
 
   private:
     GLuint texture;
@@ -110,8 +131,6 @@ class Textured3DModel : public ModelBase {
     GLfloat* uvs;
     GLuint texture;
     unsigned int numVertex;
-    const VData* vertexAttrib;
-    const VData* uvAttrib;
 };
 
 
