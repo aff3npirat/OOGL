@@ -69,7 +69,7 @@ struct BufferView {
     /// (stride * (size/vertexSize)) + offset @endcode .
     /// @param values values to insert.
     /// @param size number of values to insert. Must be divisible by @code vertexSize @endcode .
-    /// @param tempOffset additional offset of elements from first group. Can be used
+    /// @param tempOffset number of groups to skip. Can be used
     /// to fill referenced @ref Buffer in batches.
     template<typename T>
     void insert(const T* values, unsigned int size, unsigned int tempOffset) const;

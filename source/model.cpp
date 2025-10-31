@@ -34,7 +34,7 @@ VData& VData::operator=(VData other)
 
 void VData::insert(const BufferView* buffer, unsigned int offset) const
 {
-    ptr->insert(buffer, offset * attribSize);
+    ptr->insert(buffer, offset);
 }
 
 
@@ -194,7 +194,6 @@ void swap(Mesh& a, Mesh& b)
 void swap(TexturedMesh& a, TexturedMesh& b)
 {
     using std::swap;
-    // TODO call base class swap
     swap(static_cast<Mesh&>(a), static_cast<Mesh&>(b));
     swap(a.texture, b.texture);
 }

@@ -33,7 +33,7 @@ template<typename T> inline void Buffer::init(std::in_place_type_t<T>, unsigned 
 template<typename T>
 inline void BufferView::insert(const T* values, unsigned int size, unsigned int tempOffset) const
 {
-    T* first = static_cast<T*>(buffer->data()) + offset + tempOffset;
+    T* first = static_cast<T*>(buffer->data()) + offset + tempOffset * stride;
 
     int idx = 0;
     int stridedIdx = 0;
