@@ -1,146 +1,59 @@
 #include "model.h"
 
 #include <algorithm>
+#include <cstring>
 
 
-VData::~VData()
+Mesh::Mesh(unsigned int numVertex) : numVertex(numVertex) {}
+
+
+Mesh::Mesh(Mesh&& other) : numVertex(other.numVertex)
 {
-    delete ptr;
+    this->buffers = other.buffers;
+    this->data = other.data;
 }
 
-
-VData::VData()
+Mesh& Mesh::operator=(Mesh&& other)
 {
-    this->ptr = nullptr;
-    this->attribSize = 0;
-}
-
-
-VData::VData(const VData& other) : attribSize(other.attribSize), ptr(other.ptr->createCopy()) {}
-
-
-VData::VData(VData&& other) : VData()
-{
-    swap(*this, other);
-}
-
-
-VData& VData::operator=(VData other)
-{
-    swap(*this, other);
+    this->numVertex = other.numVertex;
+    this->data = other.data;
+    this->buffers = other.buffers;
     return *this;
 }
 
 
-void VData::insert(const BufferView* buffer, unsigned int offset) const
+void Mesh::insert(unsigned int offset)
 {
-    ptr->insert(buffer, offset);
-}
+    for (int i = 0; i < data.size(); i++) {
+        unsigned int byteOffset = offset * data[i].byteSize + data[i].offset;
+        void* dest = static_cast<void*>(static_cast<uint8_t*>(buffers[i]->data()) + byteOffset);
+        const void* src = data[i].data;
 
+        for (int j = 0; j < numVertex; j++) {
+            std::memcpy(dest, src, data[i].vertexSize * data[i].byteSize);
 
-Mesh::Mesh(
-    const BufferView** buffers, const VData* attribs, unsigned int size, unsigned int numVertex)
-{
-    this->buffers = new const BufferView*[size];
-    this->attribs = new VData[size];
-    for (int i = 0; i < size; i++) {
-        this->buffers[i] = buffers[i];
-        this->attribs[i] = attribs[i];
-    }
-
-    this->numVertex = numVertex;
-    this->numAttribs = size;
-}
-
-
-Mesh::~Mesh()
-{
-    delete[] buffers;
-    delete[] attribs;
-}
-
-
-Mesh::Mesh(const Mesh& other) : numVertex(other.numVertex), numAttribs(other.numAttribs)
-{
-    this->buffers = new const BufferView*[numAttribs];
-    this->attribs = new VData[numAttribs];
-    for (int i = 0; i < numAttribs; i++) {
-        this->buffers[i] = other.buffers[i];
-        this->attribs[i] = other.attribs[i];
+            dest = static_cast<void*>(static_cast<uint8_t*>(dest) + data[i].stride);
+            src = static_cast<const void*>(
+                static_cast<const uint8_t*>(src) + data[i].vertexSize * data[i].byteSize);
+        }
     }
 }
 
 
-Mesh::Mesh(Mesh&& other) : Mesh()
+TexturedMesh::TexturedMesh(unsigned int numVertex, GLuint texture)
+    : Mesh(numVertex), texture(texture)
 {
-    swap(*this, other);
 }
 
 
-Mesh& Mesh::operator=(Mesh other)
+TexturedMesh::TexturedMesh(TexturedMesh&& other) : Mesh(std::move(other)), texture(other.texture) {}
+
+
+TexturedMesh& TexturedMesh::operator=(TexturedMesh&& other)
 {
-    swap(*this, other);
-    return *this;
-}
-
-
-void Mesh::insert(unsigned int offset) const
-{
-    for (int i = 0; i < numAttribs; i++) {
-        attribs[i].insert(buffers[i], offset);
-    }
-}
-
-
-unsigned int Mesh::getNumVertex() const
-{
-    return numVertex;
-}
-
-Mesh::Mesh()
-{
-    this->attribs = nullptr;
-    this->buffers = nullptr;
-    this->numAttribs = 0;
-    this->numVertex = 0;
-}
-
-
-TexturedMesh::TexturedMesh(const BufferView** buffers, const VData* attribs, unsigned int size,
-    unsigned int numVertex, GLuint texture)
-    : Mesh(buffers, attribs, size, numVertex)
-{
-    this->texture = texture;
-}
-
-
-TexturedMesh::TexturedMesh(const TexturedMesh& other) : Mesh(other)
-{
+    Mesh::operator=(std::move(other));
     this->texture = other.texture;
-}
-
-
-TexturedMesh::TexturedMesh(TexturedMesh&& other) : TexturedMesh()
-{
-    swap(*this, other);
-}
-
-TexturedMesh& TexturedMesh::operator=(TexturedMesh other)
-{
-    swap(*this, other);
     return *this;
-}
-
-
-GLuint TexturedMesh::getTexture() const
-{
-    return texture;
-}
-
-
-TexturedMesh::TexturedMesh() : Mesh()
-{
-    this->texture = 0;
 }
 
 
@@ -167,33 +80,9 @@ Textured3DModel::~Textured3DModel()
 TexturedMesh Textured3DModel::getMesh(
     const BufferView* vertexBuffer, const BufferView* uvBuffer) const
 {
-    const BufferView* buffers[2] = {vertexBuffer, uvBuffer};
-    VData attribs[2] = {VData(vertices, numVertex * 3, 3), VData(uvs, numVertex * 2, 2)};
-    return TexturedMesh(buffers, attribs, 2, numVertex, texture);
-}
+    TexturedMesh mesh(numVertex, texture);
+    mesh.addVertexData(vertexBuffer, vertices);
+    mesh.addVertexData(uvBuffer, uvs);
 
-
-void swap(VData& a, VData& b)
-{
-    using std::swap;
-    swap(a.ptr, b.ptr);
-    swap(a.attribSize, b.attribSize);
-}
-
-
-void swap(Mesh& a, Mesh& b)
-{
-    using std::swap;
-    swap(a.numAttribs, b.numAttribs);
-    swap(a.numVertex, b.numVertex);
-    swap(a.attribs, b.attribs);
-    swap(a.buffers, b.buffers);
-}
-
-
-void swap(TexturedMesh& a, TexturedMesh& b)
-{
-    using std::swap;
-    swap(static_cast<Mesh&>(a), static_cast<Mesh&>(b));
-    swap(a.texture, b.texture);
+    return mesh;
 }

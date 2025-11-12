@@ -1,14 +1,9 @@
 #include "buffer.h"
 
 
-BufferView::BufferView(
-    Buffer* buffer, unsigned int stride, unsigned int offset, unsigned int vertexSize, int glType)
+Buffer::~Buffer()
 {
-    this->buffer = buffer;
-    this->stride = (stride == 0) ? vertexSize : stride;
-    this->offset = offset;
-    this->vertexSize = vertexSize;
-    this->glType = glType;
+    delete ptr;
 }
 
 

@@ -1,18 +1,18 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
 #include <utility>
 
-#include "render_context.h"
 
-
-template<IsMesh M> void Renderer<M>::addModel(M& mesh)
+template<IsMesh M, IsBatch B> inline void Renderer<M, B>::addModel(M& mesh)
 {
     toRender.push_back(std::move(mesh));
 }
 
 
-template<IsMesh M> Renderer<M>::Renderer(const BufferView* bufferViews, unsigned int size)
+template<IsMesh M, IsBatch B>
+inline Renderer<M, B>::Renderer(const BufferView* bufferViews, unsigned int size)
 {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -44,8 +44,27 @@ template<IsMesh M> Renderer<M>::Renderer(const BufferView* bufferViews, unsigned
 }
 
 
-template<IsMesh M>
-inline Renderer<M>::Renderer(std::initializer_list<BufferView> bufferViews)
-    : Renderer<M>::Renderer(bufferViews.begin(), bufferViews.size())
+template<IsMesh M, IsBatch B>
+inline Renderer<M, B>::Renderer(std::initializer_list<BufferView> bufferViews)
+    : Renderer<M, B>::Renderer(bufferViews.begin(), bufferViews.size())
 {
+}
+
+
+template<IsMesh M, IsBatch B> inline Renderer<M, B>::~Renderer()
+{
+    delete[] buffers;
+}
+
+
+template<IsMesh M, IsBatch B> inline void Renderer<M, B>::begin()
+{
+    toRender.clear();
+}
+
+
+template<IsMesh M, IsBatch B> inline void Renderer<M, B>::end()
+{
+    renderBatches.clear();
+    generateBatches();
 }

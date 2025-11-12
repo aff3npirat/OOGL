@@ -225,9 +225,11 @@ int main()
 
     Textured3DModel cube(&cubeVertices[0], &cubeUvs[0], 36, texture);
 
-    Renderer<TexturedMesh> context({vbo, uvbo});
+    Renderer<TexturedMesh, TextureBatch> context({vbo, uvbo});
     TexturedMesh cubeMesh = cube.getMesh(&vbo, &uvbo);
+    context.begin();
     context.addModel(cubeMesh);
+    context.end();
 
     glClearColor(0.0, 0.0, 0.0, 0.0f);
     glEnable(GL_DEPTH_TEST);

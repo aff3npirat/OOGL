@@ -28,21 +28,3 @@ template<typename T> inline void Buffer::init(std::in_place_type_t<T>, unsigned 
 {
     ptr = new Implement<T>(size);
 }
-
-
-template<typename T>
-inline void BufferView::insert(const T* values, unsigned int size, unsigned int tempOffset) const
-{
-    T* first = static_cast<T*>(buffer->data()) + offset + tempOffset * stride;
-
-    int idx = 0;
-    int stridedIdx = 0;
-    while (idx < size) {
-        for (int j = 0; j < vertexSize; j++) {
-            first[stridedIdx + j] = values[idx + j];
-        }
-
-        idx += vertexSize;
-        stridedIdx += stride;
-    }
-}
