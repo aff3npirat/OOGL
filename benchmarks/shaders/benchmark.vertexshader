@@ -1,0 +1,14 @@
+#version 330 core
+
+layout(location = 0) in vec3 vertex_pos;
+layout(location = 1) in float vertex_color;
+out float frag_color;
+
+// uniform mat4 VP;
+
+void main(){
+
+    gl_Position = vec4(vertex_pos, 1.0f);
+
+    frag_color = vertex_color;
+}
