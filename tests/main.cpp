@@ -47,7 +47,7 @@ GLenum init_glew()
 }
 
 
-std::string read_file(const char* fpath)
+std::string readFile(const char* fpath)
 {
     std::string content = "";
     std::ifstream Stream(fpath, std::ios::in);
@@ -176,8 +176,8 @@ int main()
 
     printf("OpenGL Version: %s\n", glGetString(GL_VERSION));
 
-    std::string vertexSource = read_file("../shaders/vertex.vertexshader");
-    std::string fragmentSource = read_file("../shaders/fragment.fragmentshader");
+    std::string vertexSource = readFile("../shaders/vertex.vertexshader");
+    std::string fragmentSource = readFile("../shaders/fragment.fragmentshader");
 
     ShaderProgram shader(vertexSource.c_str(), fragmentSource.c_str());
     shader.registerGLSetting([]() { glActiveTexture(GL_TEXTURE0); });
