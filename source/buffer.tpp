@@ -18,12 +18,6 @@ template<typename T> inline Buffer::Implement<T>::~Implement()
 }
 
 
-template<typename T> inline void* Buffer::Implement<T>::getValues() const
-{
-    return (void*)values;
-}
-
-
 template<typename T> inline void Buffer::init(std::in_place_type_t<T>, unsigned int size)
 {
     ptr = new Implement<T>(size);

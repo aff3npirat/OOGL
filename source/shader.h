@@ -45,9 +45,9 @@ class ShaderProgram {
 
     /// @brief Returns index of vertex attribute.
     /// @param name of vertex attribute.
-    GLint getAttribIndex(std::string name) const;
+    GLint getAttribIndex(std::string name) const { return glGetAttribLocation(id, name.c_str()); };
     /// Returns number of vertex attributes.
-    unsigned int getNumAttribs() const;
+    unsigned int getNumAttribs() const { return numAttribs; };
 
   private:
     GLuint id;

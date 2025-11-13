@@ -15,13 +15,13 @@ struct Buffer {
     /// Allocates memory for @p size values.
     template<typename T> void init(std::in_place_type_t<T>, unsigned int size);
     /// @returns size in bytes of single value.
-    unsigned int byteSize() const;
+    unsigned int byteSize() const { return ptr->byteSize; }
     /// @returns number of values in buffer.
-    unsigned int size() const;
+    unsigned int size() const { return ptr->size; };
     /// @returns void pointer to buffer values
-    void* data() const;
+    void* data() const { return ptr->getValues(); };
     /// @returns unique OGL id assigned to a GL Buffer Object.
-    unsigned int id() const;
+    unsigned int id() const { return ptr->id; };
 
   private:
     struct Base {
@@ -37,7 +37,7 @@ struct Buffer {
         Implement(unsigned int size);
         ~Implement();
 
-        void* getValues() const;
+        void* getValues() const { return (void*)values; };
 
         T* values;
     };

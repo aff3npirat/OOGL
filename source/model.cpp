@@ -86,3 +86,12 @@ TexturedMesh Textured3DModel::getMesh(
 
     return mesh;
 }
+
+
+VertexData::VertexData(const BufferView* stridedView, const void* data) : data(data)
+{
+    byteSize = stridedView->buffer->byteSize();
+    stride = stridedView->stride * byteSize;
+    offset = stridedView->offset * byteSize;
+    vertexSize = stridedView->vertexSize;
+}

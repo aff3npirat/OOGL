@@ -6,6 +6,8 @@
 
 
 struct VertexData {
+    VertexData(const BufferView* stridedView, const void* data);
+
     const void* data;
     unsigned int stride;
     unsigned int offset;
