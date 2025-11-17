@@ -25,16 +25,17 @@ Mesh& Mesh::operator=(Mesh&& other)
 void Mesh::insert(unsigned int offset)
 {
     for (int i = 0; i < data.size(); i++) {
-        unsigned int byteOffset = offset * data[i].byteSize + data[i].offset;
-        void* dest = static_cast<void*>(static_cast<uint8_t*>(buffers[i]->data()) + byteOffset);
-        const void* src = data[i].data;
+        VertexData* currVData = &(data[i]);
+        
+        unsigned int byteOffset = offset * currVData->byteSize + currVData->offset;
+        uint8_t* dest = static_cast<uint8_t*>(buffers[i]->data()) + byteOffset;
+        const uint8_t* src = static_cast<const uint8_t*>(currVData->data);
 
         for (int j = 0; j < numVertex; j++) {
-            std::memcpy(dest, src, data[i].vertexSize * data[i].byteSize);
+            std::memcpy(static_cast<void*>(dest), static_cast<const void*>(src), currVData->vertexSize);
 
-            dest = static_cast<void*>(static_cast<uint8_t*>(dest) + data[i].stride);
-            src = static_cast<const void*>(
-                static_cast<const uint8_t*>(src) + data[i].vertexSize * data[i].byteSize);
+            dest += currVData->stride;
+            src += currVData->vertexSize;
         }
     }
 }
@@ -93,5 +94,5 @@ VertexData::VertexData(const BufferView* stridedView, const void* data) : data(d
     byteSize = stridedView->buffer->byteSize();
     stride = stridedView->stride * byteSize;
     offset = stridedView->offset * byteSize;
-    vertexSize = stridedView->vertexSize;
+    vertexSize = stridedView->vertexSize * byteSize;
 }
