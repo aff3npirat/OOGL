@@ -1,11 +1,12 @@
 include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+add_link_options(-static -static-libgcc -static-libstdc++)
 
 add_executable(benchmarks "benchmark.cpp")
 set_target_properties(benchmarks PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 target_sources(benchmarks PUBLIC
-    utility.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/utility.cpp
 )
 target_link_libraries(benchmarks PRIVATE ogl_lib)
 
