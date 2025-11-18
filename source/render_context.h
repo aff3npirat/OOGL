@@ -21,6 +21,7 @@ struct TextureBatch {
     GLuint texture;
 };
 
+namespace Detail {
 template<class T> concept IsMesh = std::is_base_of<Mesh, T>::value;
 template<class T> concept IsBatch = requires(T a) {
     { a.numVertex } -> std::convertible_to<unsigned int>;
@@ -67,6 +68,12 @@ template<> void Renderer<Mesh, RenderBatch>::generateBatches();
 /// @brief renders all meshes and minimizes glDraw calls.
 template<> void Renderer<TexturedMesh, TextureBatch>::render();
 template<> void Renderer<TexturedMesh, TextureBatch>::generateBatches();
+
+}    // namespace Detail
+
+
+using Renderer = Detail::Renderer<Mesh, RenderBatch>;
+using TextureRenderer = Detail::Renderer<TexturedMesh, TextureBatch>;
 
 
 #include "render_context.tpp"

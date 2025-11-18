@@ -225,7 +225,7 @@ int main()
 
     Textured3DModel cube(&cubeVertices[0], &cubeUvs[0], 36, texture);
 
-    Renderer<TexturedMesh, TextureBatch> context({vbo, uvbo});
+    Renderer context({vbo, uvbo});
     TexturedMesh cubeMesh = cube.getMesh(&vbo, &uvbo);
     context.begin();
     context.addModel(cubeMesh);

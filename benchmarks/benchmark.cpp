@@ -31,7 +31,7 @@ BenchmarkStats run_impl(GLFWwindow* window)
     BufferView vbo(&buf, 4, 0, 3, GL_FLOAT);
     BufferView cbo(&buf, 4, 3, 1, GL_FLOAT);
     const BufferView* buffers[2] = {&vbo, &cbo};
-    Renderer<Mesh, RenderBatch> renderer({vbo, cbo});
+    Renderer renderer({vbo, cbo});
 
     GLfloat* vertices = new GLfloat[numVertex * 3];
     GLfloat* colors = new GLfloat[numVertex * 1];

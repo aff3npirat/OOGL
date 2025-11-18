@@ -4,7 +4,7 @@
 #include "render_context.h"
 
 
-template<> void Renderer<Mesh, RenderBatch>::render()
+template<> void Detail::Renderer<Mesh, RenderBatch>::render()
 {
     glBindVertexArray(vao);
     for (GLint i = 0; i < numAttribs; i++) {
@@ -20,7 +20,7 @@ template<> void Renderer<Mesh, RenderBatch>::render()
 }
 
 
-template<> void Renderer<Mesh, RenderBatch>::generateBatches()
+template<> void Detail::Renderer<Mesh, RenderBatch>::generateBatches()
 {
     unsigned int numVertex = 0;
     for (int i = 0; i < toRender.size(); i++) {
@@ -40,7 +40,7 @@ template<> void Renderer<Mesh, RenderBatch>::generateBatches()
 }
 
 
-template<> void Renderer<TexturedMesh, TextureBatch>::render()
+template<> void Detail::Renderer<TexturedMesh, TextureBatch>::render()
 {
     glBindVertexArray(vao);
     for (GLint i = 0; i < numAttribs; i++) {
@@ -58,7 +58,7 @@ template<> void Renderer<TexturedMesh, TextureBatch>::render()
 }
 
 
-template<> void Renderer<TexturedMesh, TextureBatch>::generateBatches()
+template<> void Detail::Renderer<TexturedMesh, TextureBatch>::generateBatches()
 {
     std::sort(toRender.begin(), toRender.end(), [](const TexturedMesh& a, const TexturedMesh& b) {
         return a.getTexture() <= b.getTexture();
