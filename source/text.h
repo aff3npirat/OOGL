@@ -1,11 +1,11 @@
 #pragma once
 
 #include <GL/glew.h>
+#include FT_FREETYPE_H
 #include <ft2build.h>
 
 #include <map>
 #include <vector>
-#include FT_FREETYPE_H
 
 #include "render_context.h"
 

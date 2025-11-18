@@ -6,7 +6,6 @@
 #include <glm/glm.hpp>
 #include <map>
 #include <stdexcept>
-#include <type_traits>
 
 
 /// @brief Compiles and links vertex and fragment shaders.

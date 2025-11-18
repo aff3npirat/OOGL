@@ -1,5 +1,7 @@
 #include "render_context.h"
 
+#include <algorithm>
+
 #include "model.h"
 #include "render_context.h"
 

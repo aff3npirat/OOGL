@@ -1,6 +1,8 @@
 #pragma once
 #include "buffer.h"
 
+#include <utility>
+
 
 template<typename T> inline Buffer::Implement<T>::Implement(unsigned int size)
 {

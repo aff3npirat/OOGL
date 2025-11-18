@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <map>
-#include <utility>
 
 
 using Detail::IsBatch;
