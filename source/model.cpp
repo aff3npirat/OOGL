@@ -1,7 +1,7 @@
 #include "model.h"
 
-#include <algorithm>
 #include <cstring>
+#include <cstdint>
 
 
 Mesh::Mesh(unsigned int numVertex) : numVertex(numVertex) {}
