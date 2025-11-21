@@ -7,16 +7,15 @@
 Mesh::Mesh(unsigned int numVertex) : numVertex(numVertex) {}
 
 
-Mesh::Mesh(Mesh&& other) : numVertex(other.numVertex)
+Mesh::Mesh(Mesh&& other) : numVertex(other.numVertex), buffers(other.buffers)
 {
-    this->buffers = other.buffers;
-    this->data = other.data;
+    this->data.swap(other.data);
 }
 
 Mesh& Mesh::operator=(Mesh&& other)
 {
     this->numVertex = other.numVertex;
-    this->data = other.data;
+    this->data.swap(other.data);
     this->buffers = other.buffers;
     return *this;
 }
@@ -25,7 +24,7 @@ Mesh& Mesh::operator=(Mesh&& other)
 Mesh::~Mesh()
 {
     for (int i = 0; i < data.size(); i++) {
-        delete[] data[i].data;
+        delete[] static_cast<const uint8_t*>(data[i].data);
     }
 }
 
