@@ -20,14 +20,12 @@ class Mesh {
     Mesh(unsigned int numVertex);
     Mesh(Mesh&& other);
     Mesh& operator=(Mesh&& other);
+    ~Mesh();
 
     template<typename T> void addVertexData(const BufferView* view, const T* data);
     void insert(unsigned int byteOffset);
 
     unsigned int getNumVertex() const { return numVertex; }
-
-  protected:
-    Mesh() = default;
 
   private:
     unsigned int numVertex;
