@@ -16,6 +16,7 @@
 #include "source/model.h"
 #include "source/render_context.h"
 #include "source/shader.h"
+#include "source/text.h"
 
 
 int init_glfw()

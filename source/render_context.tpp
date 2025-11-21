@@ -23,13 +23,13 @@ inline Detail::Renderer<M, B>::Renderer(const BufferView* bufferViews, unsigned 
 
     std::map<GLuint, Buffer*> buffers;
     for (int i = 0; i < size; i++) {
-        glBindBuffer(GL_ARRAY_BUFFER, bufferViews[i].buffer->id());
+        glBindBuffer(GL_ARRAY_BUFFER, bufferViews[i].buffer->getId());
         glVertexAttribPointer(i, bufferViews[i].vertexSize, bufferViews[i].glType, GL_FALSE,
-            bufferViews[i].stride * bufferViews[i].buffer->byteSize(),
-            (void*)(std::intptr_t)(bufferViews[i].offset * bufferViews[i].buffer->byteSize()));
+            bufferViews[i].stride * bufferViews[i].buffer->getByteSize(),
+            (void*)(std::intptr_t)(bufferViews[i].offset * bufferViews[i].buffer->getByteSize()));
 
-        if (!buffers.contains(bufferViews[i].buffer->id())) {
-            buffers[bufferViews[i].buffer->id()] = bufferViews[i].buffer;
+        if (!buffers.contains(bufferViews[i].buffer->getId())) {
+            buffers[bufferViews[i].buffer->getId()] = bufferViews[i].buffer;
         }
     }
 

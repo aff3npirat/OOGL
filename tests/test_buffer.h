@@ -22,6 +22,6 @@ TEST_CASE("Buffer::init")
     setupIntBuffer(50, buf);
 
     unsigned int expected = sizeof(int) * 50;
-    ASSERT_TRUE(expected == buf.size() * buf.byteSize());
-    ASSERT_TRUE(buf.id() != 0);
+    ASSERT_TRUE(expected == buf.getSize() * buf.getByteSize());
+    ASSERT_TRUE(buf.getId() != 0);
 }

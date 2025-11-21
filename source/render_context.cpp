@@ -33,8 +33,8 @@ template<> void Detail::Renderer<Mesh, RenderBatch>::generateBatches()
     renderBatches.emplace_back(0, numVertex);
 
     for (int i = 0; i < numBuffers; i++) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffers[i]->id());
-        glBufferData(GL_ARRAY_BUFFER, buffers[i]->byteSize() * buffers[i]->size(),
+        glBindBuffer(GL_ARRAY_BUFFER, buffers[i]->getId());
+        glBufferData(GL_ARRAY_BUFFER, buffers[i]->getByteSize() * buffers[i]->getSize(),
             buffers[i]->data(), GL_STATIC_DRAW);
     }
 
@@ -81,8 +81,8 @@ template<> void Detail::Renderer<TexturedMesh, TextureBatch>::generateBatches()
     }
 
     for (int i = 0; i < numBuffers; i++) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffers[i]->id());
-        glBufferData(GL_ARRAY_BUFFER, buffers[i]->byteSize() * buffers[i]->size(),
+        glBindBuffer(GL_ARRAY_BUFFER, buffers[i]->getId());
+        glBufferData(GL_ARRAY_BUFFER, buffers[i]->getByteSize() * buffers[i]->getSize(),
             buffers[i]->data(), GL_STATIC_DRAW);
     }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
