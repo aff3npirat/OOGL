@@ -1,0 +1,12 @@
+#version 330 core
+
+in vec2 frag_uv;
+in vec3 frag_color;
+out vec4 color;
+
+uniform sampler2D textureSampler;
+
+void main(){
+    color = vec4(0.0, 1.0, 0.0, texture(textureSampler, frag_uv).r);
+    //color.xyzw = vec4(0.0, 1.0, 0.0, 1.0);
+}

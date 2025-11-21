@@ -10,7 +10,9 @@
 
 
 TextRenderer::TextRenderer(const char* fpath)
-    : vbo(&buffer, 7, 0, 2, GL_FLOAT),
+    : bufferSize(0),
+      buffer(),
+      vbo(&buffer, 7, 0, 2, GL_FLOAT),
       uvbo(&buffer, 7, 2, 2, GL_FLOAT),
       cbo(&buffer, 7, 4, 3, GL_FLOAT),
       renderer({vbo, uvbo, cbo})
@@ -32,14 +34,15 @@ TextRenderer::~TextRenderer() {}
 
 void TextRenderer::begin()
 {
+    buffer.resize(std::in_place_type<GLfloat>, 0);
     renderer.begin();
 }
 
 
 void TextRenderer::end()
 {
-    renderer.end();
     buffer.resize(std::in_place_type<GLfloat>, bufferSize);
+    renderer.end();
 }
 
 
@@ -79,12 +82,12 @@ void TextRenderer::draw(GLfloat x, GLfloat y, GLfloat R, GLfloat G, GLfloat B, c
         mesh.addVertexData(&vbo, vertices);
 
         GLfloat uvs[6 * 2] = {// clang-format off
-            0.0, 0.0,
-            0.0, 1.0,
-            1.0, 1.0,
-            0.0, 0.0,
-            1.0, 1.0,
-            1.0, 0.0
+            0.0f, 1.0f,
+            0.0f, 0.0f,
+            1.0f, 0.0f,
+            0.0f, 1.0f,
+            1.0f, 0.0f,
+            1.0f, 1.0f
         };    // clang-format on
         mesh.addVertexData(&uvbo, uvs);
 
@@ -99,7 +102,7 @@ void TextRenderer::draw(GLfloat x, GLfloat y, GLfloat R, GLfloat G, GLfloat B, c
         };    // clang-format on
         mesh.addVertexData(&cbo, colors);
         renderer.addModel(mesh);
-        bufferSize += 6 * 3 * 3 * 3;
+        bufferSize += 6 * (3 + 2 + 2);
 
         x += current.advanceX;
     }
@@ -128,12 +131,7 @@ GLuint TextRenderer::generate_texture(char c, FT_Bitmap* bitmap)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     return texture;
-}
-
-
-Glyph::Glyph(
-    GLuint texture, GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat R, GLfloat G, GLfloat B)
-    : texture(texture), vertices{x1, y1, x1, y2, x2, y2, x1, y1, x2, y2, x2, y1}, colors{R, G, B}
-{
 }

@@ -159,6 +159,8 @@ GLuint loadBMP_custom(const char* imagepath)
     // ... which requires mipmaps. Generate them automatically.
     glGenerateMipmap(GL_TEXTURE_2D);
 
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     // Return the ID of the texture we just created
     return textureID;
 }
@@ -226,11 +228,29 @@ int main()
 
     Textured3DModel cube(&cubeVertices[0], &cubeUvs[0], 36, texture);
 
-    Renderer context({vbo, uvbo});
+    TextureRenderer context({vbo, uvbo});
     TexturedMesh cubeMesh = cube.getMesh(&vbo, &uvbo);
     context.begin();
     context.addModel(cubeMesh);
     context.end();
+
+    vertexSource = readFile("../shaders/text.vertexshader");
+    fragmentSource = readFile("../shaders/text.fragmentshader");
+    ShaderProgram textShader(vertexSource.c_str(), fragmentSource.c_str());
+
+    glm::mat4 textProjection = glm::ortho(0.0f, 780.0f, 0.0f, 780.0f);
+    textShader.bindUniform("P", GL_FALSE, &textProjection[0][0]);
+    textShader.bindUniform("textureSampler", &textureIdx);
+    textShader.registerGLSetting([]() {
+        glActiveTexture(GL_TEXTURE0);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    });
+
+    TextRenderer textContext("../resources/fonts/ARIALMT.ttf");
+    textContext.begin();
+    textContext.draw(0.5 * 780.0, 0.5 * 780.0, 1.0, 1.0, 1.0, "H");
+    textContext.end();
 
     glClearColor(0.0, 0.0, 0.0, 0.0f);
     glEnable(GL_DEPTH_TEST);
@@ -239,9 +259,12 @@ int main()
     do {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glDisable(GL_BLEND);
         shader.use();
-
         context.render();
+
+        textShader.use();
+        textContext.render();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

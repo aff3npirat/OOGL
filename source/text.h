@@ -11,15 +11,6 @@
 #include "render_context.h"
 
 
-struct Glyph {
-    Glyph(GLuint texture, GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat R, GLfloat G,
-        GLfloat B);
-
-    GLuint texture;
-    GLfloat vertices[12];
-    GLfloat colors[3];
-};
-
 struct Character {
     GLuint texture;
     unsigned int width, height;
@@ -40,12 +31,12 @@ class TextRenderer {
   private:
     GLuint generate_texture(char c, FT_Bitmap* bitmap);
 
-    TextureRenderer renderer;
     std::size_t bufferSize;
     Buffer buffer;
     BufferView vbo;
     BufferView uvbo;
     BufferView cbo;
+    TextureRenderer renderer;
     FT_Library library;
     FT_Face face;
     std::map<char, Character> cache;
