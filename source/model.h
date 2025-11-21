@@ -23,7 +23,7 @@ class Mesh {
     ~Mesh();
 
     template<typename T> void addVertexData(const BufferView* view, const T* data);
-    void insert(unsigned int byteOffset);
+    void insert(unsigned int offset);
 
     unsigned int getNumVertex() const { return numVertex; }
 
