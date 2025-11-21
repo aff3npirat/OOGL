@@ -13,7 +13,7 @@ struct Buffer {
     Buffer& operator=(Buffer& other) = delete;
 
     /// Allocates memory for @p size values.
-    template<typename T> void init(std::in_place_type_t<T>, unsigned int size);
+    template<typename T> void resize(std::in_place_type_t<T>, unsigned int size);
     /// @returns size in bytes of single value.
     unsigned int getByteSize() const { return byteSize; }
     /// @returns number of values in buffer.

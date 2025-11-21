@@ -16,10 +16,10 @@ template<typename T> inline Buffer::Implement<T>::~Implement()
 }
 
 
-template<typename T> inline void Buffer::init(std::in_place_type_t<T>, unsigned int size)
+template<typename T> inline void Buffer::resize(std::in_place_type_t<T>, unsigned int size)
 {
     delete ptr;
-    
+
     ptr = new Implement<T>(size);
     this->size = size;
     byteSize = sizeof(T);

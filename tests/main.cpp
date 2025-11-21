@@ -195,7 +195,7 @@ int main()
     GLuint texture = loadBMP_custom("../resources/uvtemplate.bmp");
 
     Buffer buffer;
-    buffer.init(std::in_place_type<GLfloat>, 180);
+    buffer.resize(std::in_place_type<GLfloat>, 180);
 
     BufferView vbo(&buffer, 5, 0, 3, GL_FLOAT);
     BufferView uvbo(&buffer, 5, 3, 2, GL_FLOAT);

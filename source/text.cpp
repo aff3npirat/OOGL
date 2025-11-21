@@ -4,10 +4,16 @@
 
 #include <stdexcept>
 #include <string>
+#include <utility>
+
+#include "model.h"
 
 
-TextRenderer::TextRenderer(const char* fpath, Buffer* buffer)
-    : vbo(buffer, 5, 0, 2, GL_FLOAT), cbo(buffer, 5, 2, 3, GL_FLOAT), renderer({vbo, cbo})
+TextRenderer::TextRenderer(const char* fpath)
+    : vbo(&buffer, 7, 0, 2, GL_FLOAT),
+      uvbo(&buffer, 7, 2, 2, GL_FLOAT),
+      cbo(&buffer, 7, 4, 3, GL_FLOAT),
+      renderer({vbo, uvbo, cbo})
 {
     if (FT_Init_FreeType(&library)) {
         throw std::runtime_error("Could not load FreeType2");
@@ -22,6 +28,19 @@ TextRenderer::TextRenderer(const char* fpath, Buffer* buffer)
 
 
 TextRenderer::~TextRenderer() {}
+
+
+void TextRenderer::begin()
+{
+    renderer.begin();
+}
+
+
+void TextRenderer::end()
+{
+    renderer.end();
+    buffer.resize(std::in_place_type<GLfloat>, bufferSize);
+}
 
 
 void TextRenderer::draw(GLfloat x, GLfloat y, GLfloat R, GLfloat G, GLfloat B, const char* text)
@@ -48,7 +67,8 @@ void TextRenderer::draw(GLfloat x, GLfloat y, GLfloat R, GLfloat G, GLfloat B, c
         GLfloat y1 = y - (current.height - current.bearingY);
         GLfloat y2 = y1 + current.height;
 
-        GLfloat vertices_[12] = {// clang-format off
+        TexturedMesh mesh(6, current.texture);
+        GLfloat vertices[6 * 2] = {// clang-format off
             x1, y1,
             x1, y2,
             x2, y2,
@@ -56,22 +76,40 @@ void TextRenderer::draw(GLfloat x, GLfloat y, GLfloat R, GLfloat G, GLfloat B, c
             x2, y2,
             x2, y1
         };    // clang-format on
-        VData vertices(vertices_, 12, 2);
-        GLfloat colors_[3] = {R, G, B};
-        VData colors(colors_, 3, 3);    // TODO colors must be provided per vertex
-        // TODO add uv coordinates as attrib
+        mesh.addVertexData(&vbo, vertices);
 
-        const VData attribs[2] = {vertices, colors};
-        const BufferView buffers[2] = {vbo, cbo};
-        TexturedMesh mesh(buffers, attribs, 2, 6, current.texture);
-        renderer.addModel(&mesh);
+        GLfloat uvs[6 * 2] = {// clang-format off
+            0.0, 0.0,
+            0.0, 1.0,
+            1.0, 1.0,
+            0.0, 0.0,
+            1.0, 1.0,
+            1.0, 0.0
+        };    // clang-format on
+        mesh.addVertexData(&uvbo, uvs);
+
+        GLfloat colors[6 * 3] = {
+            // clang-format off
+            R, G, B,
+            R, G, B,
+            R, G, B,
+            R, G, B,
+            R, G, B,
+            R, G, B,
+        };    // clang-format on
+        mesh.addVertexData(&cbo, colors);
+        renderer.addModel(mesh);
+        bufferSize += 6 * 3 * 3 * 3;
 
         x += current.advanceX;
     }
 }
 
 
-void TextRenderer::render() {}
+void TextRenderer::render()
+{
+    renderer.render();
+}
 
 
 GLuint TextRenderer::generate_texture(char c, FT_Bitmap* bitmap)

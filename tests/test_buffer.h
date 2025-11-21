@@ -8,7 +8,7 @@
 
 
 void setupIntBuffer(unsigned int size, Buffer& buf) {
-    buf.init(std::in_place_type<int>, size);
+    buf.resize(std::in_place_type<int>, size);
     int* bufData = static_cast<int*>(buf.data());
     for (int i = 0; i < size; i++) {
         bufData[i] = 0;
@@ -16,7 +16,7 @@ void setupIntBuffer(unsigned int size, Buffer& buf) {
 }
 
 
-TEST_CASE("Buffer::init")
+TEST_CASE("Buffer::resize")
 {
     Buffer buf;
     setupIntBuffer(50, buf);

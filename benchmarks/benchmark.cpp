@@ -27,7 +27,7 @@ BenchmarkStats run_impl(GLFWwindow* window)
     unsigned int numVertex = xCubes * yCubes * 36;
 
     Buffer buf;
-    buf.init(std::in_place_type<GLfloat>, numVertex * 4);
+    buf.resize(std::in_place_type<GLfloat>, numVertex * 4);
     BufferView vbo(&buf, 4, 0, 3, GL_FLOAT);
     BufferView cbo(&buf, 4, 3, 1, GL_FLOAT);
     const BufferView* buffers[2] = {&vbo, &cbo};
