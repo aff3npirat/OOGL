@@ -25,7 +25,7 @@ Mesh& Mesh::operator=(Mesh&& other)
 Mesh::~Mesh()
 {
     for (int i = 0; i < data.size(); i++) {
-        delete[] data[i].data;
+        delete[] static_cast<const uint8_t*>(data[i].data);
     }
 }
 
