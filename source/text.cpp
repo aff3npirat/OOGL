@@ -34,6 +34,7 @@ TextRenderer::~TextRenderer() {}
 
 void TextRenderer::begin()
 {
+    bufferSize = 0;
     buffer.resize(std::in_place_type<GLfloat>, 0);
     renderer.begin();
 }
