@@ -2,77 +2,70 @@
 
 #include <GL/Glew.h>
 
-#include <initializer_list>
+#include <cstddef>
 #include <vector>
 
 #include "buffer.h"
-#include "model.h"
 
 
-struct RenderBatch {
-    unsigned int offset;
-    unsigned int numVertex;
+struct VertexAttribute {
+    unsigned int size;
+    GLenum glType;
+    GLboolean normalized;
 };
 
-struct TextureBatch {
-    unsigned int offset;
-    unsigned int numVertex;
-    GLuint texture;
+
+struct AttributeBinding {
+    const VertexAttribute* attribute;
+    VertexBuffer* buffer;
+    unsigned int index;
+    // Layout of vertex data (in bytes)
+    std::size_t offset;
+    std::size_t stride;
+    std::size_t valSize;
 };
 
-namespace Detail {
-template<class T> concept IsMesh = std::is_base_of<Mesh, T>::value;
-template<class T> concept IsBatch = requires(T a) {
-    { a.numVertex } -> std::convertible_to<unsigned int>;
-    { a.offset } -> std::convertible_to<unsigned int>;
-};
 
-/// @brief Manages VAO initialization and vertex attribute data transfer to OGL Buffer Objects.
-/// @tparam M mesh to use. For Example use @ref TexturedMesh to render meshes with texture.
-template<IsMesh M, IsBatch B> class Renderer {
+class VAO {
   public:
-    /// @param bufferViews specifies indices where vertex attribute values are. Element at index i
-    /// corresponds to Vertexshader attribute with index @code i @endcode .
-    /// @param size number of @p bufferViews .
-    Renderer(const BufferView* bufferViews, unsigned int size);
-    Renderer(std::initializer_list<BufferView> bufferViews);
-    ~Renderer();
-    Renderer(const Renderer& other) = delete;
-    Renderer<M, B>& operator=(const Renderer<M, B>& other) = delete;
+    VAO(GLenum renderMode);
+    ~VAO();
 
-    /// @brief Adds a @ref Mesh to be rendered.
-    /// This Method does not modifies any data and also does. All changes to @p mesh will be
-    /// rendererd when @ref RenderContext#render is called.
-    void addModel(M& mesh);
-    /// @brief Renders all stored meshes.
-    /// Data from all stored meshes will be transferred to OGL Buffer Objects and rendered.
-    void render();
+    /// @brief Creates binding between a vertex attribute and a vertex buffer.
+    /// @param attribute Specifies vertex attribute.
+    /// @param index Index of vertex attribute in shader.
+    /// @param buffer Where vertex data is stored (before send to GPU memory).
+    /// @param valSize Size in bytes of single vertex attribute value.
+    /// return Binding reference.
+    const AttributeBinding* bindBuffer(const VertexAttribute* attribute, unsigned int index,
+        VertexBuffer* buffer, std::size_t valSize);
+
+    /// @brief Initializes VAO by specifying attribute data layouts.
+    /// Should be called after all attributes are bound to VAO.
+    void initialize();
+
+    /// @brief Initializes data collection.
     void begin();
+
+    /// @brief Signals that no more data will be added.
     void end();
 
-  protected:
-    void generateBatches();
+    /// @brief Copies vertex data into buffer.
+    /// @param binding Buffer binding to insert values into.
+    /// @param data Values to insert into buffer.
+    /// @param numVertex Number of vertices to insert.
+    void addData(const AttributeBinding* binding, const void* data, unsigned int numVertex);
 
-    std::vector<M> toRender;
-    std::vector<B> renderBatches;
-    GLuint vao;
-    Buffer** buffers;
-    unsigned int numBuffers;
-    unsigned int numAttribs;
+    /// @brief Renders all added vertices.
+    /// @param offset Index of first vertex to draw.
+    /// @param numVertex Number of vertices to draw.
+    void render();
+
+  private:
+    GLuint id;
+    GLenum renderMode;
+    std::vector<AttributeBinding*> attribBindings;
+    std::size_t numBuffers = 0;
+    VertexBuffer** buffers;
+    unsigned int numVertex = 0;
 };
-
-/// @brief renders all meshes with single glDraw call.
-template<> void Renderer<Mesh, RenderBatch>::render();
-template<> void Renderer<Mesh, RenderBatch>::generateBatches();
-/// @brief renders all meshes and minimizes glDraw calls.
-template<> void Renderer<TexturedMesh, TextureBatch>::render();
-template<> void Renderer<TexturedMesh, TextureBatch>::generateBatches();
-
-}    // namespace Detail
-
-
-using Renderer = Detail::Renderer<Mesh, RenderBatch>;
-using TextureRenderer = Detail::Renderer<TexturedMesh, TextureBatch>;
-
-
-#include "render_context.tpp"

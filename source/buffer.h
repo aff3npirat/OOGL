@@ -2,56 +2,36 @@
 
 #include <GL/Glew.h>
 
+#include <cstddef>
+#include <cstdint>
+
 #include <utility>
 
 
-/// @brief Manages vertex data for OGL Buffer Objects.
-struct Buffer {
-    Buffer();
-    ~Buffer();
-    Buffer(Buffer& other) = delete;
-    Buffer& operator=(Buffer& other) = delete;
+class VertexBuffer {
+  public:
+    VertexBuffer(std::size_t size);
+    ~VertexBuffer();
 
-    /// Allocates memory for @p size values.
-    template<typename T> void resize(std::in_place_type_t<T>, unsigned int size);
-    /// @returns size in bytes of single value.
-    unsigned int getByteSize() const { return byteSize; }
-    /// @returns number of values in buffer.
-    unsigned int getSize() const { return size; };
-    /// @returns void pointer to buffer values
-    void* data() const { return ptr->getValues(); };
-    /// @returns unique OGL id assigned to a GL Buffer Object.
-    unsigned int getId() const { return id; };
+    /// @brief Inserts data into buffer.
+    /// @param values Data to copy.
+    /// @param n Number of bytes to copy from `values`.
+    /// @param vertexSize Number of bytes per vertex.
+    /// @param stride Number of bytes between data of two consecutive vertices.
+    /// @param offset Byte offset from buffer begin.
+    void add(const void* values, std::size_t n, std::size_t vertexSize,
+        std::size_t stride, std::size_t offset);
 
+    /// @brief Copies content to GPU.
+    void use(GLenum mode);
+
+    GLuint id() const { return _id; }
+    std::size_t size() const { return _size; }
+  
   private:
-    struct Base {
-        virtual ~Base() {};
-        virtual void* getValues() const = 0;
-    };
+    void resize(std::size_t size);
 
-    template<typename T> struct Implement : public Base {
-        Implement(unsigned int size);
-        ~Implement();
-
-        void* getValues() const { return (void*)values; };
-
-        T* values;
-    };
-
-    Base* ptr;
-    unsigned int size;
-    unsigned int byteSize;
-    GLuint id;
+    std::uint8_t* data;
+    std::size_t _size;
+    GLuint _id;
 };
-
-
-struct BufferView {
-    Buffer* buffer;
-    unsigned int stride;
-    unsigned int offset;
-    unsigned int vertexSize;
-    int glType;
-};
-
-
-#include "buffer.tpp"

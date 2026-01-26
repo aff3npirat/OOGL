@@ -13,10 +13,9 @@
 
 #include "cmake_config.h"
 #include "source/buffer.h"
-#include "source/model.h"
 #include "source/render_context.h"
 #include "source/shader.h"
-#include "source/text.h"
+// #include "source/text.h"
 
 
 int init_glfw()
@@ -196,11 +195,18 @@ int main()
 
     GLuint texture = loadBMP_custom("../resources/uvtemplate.bmp");
 
-    Buffer buffer;
-    buffer.resize(std::in_place_type<GLfloat>, 180);
+    VertexBuffer buffer(180 * sizeof(GLfloat));
 
-    BufferView vbo(&buffer, 5, 0, 3, GL_FLOAT);
-    BufferView uvbo(&buffer, 5, 3, 2, GL_FLOAT);
+    VertexAttribute vertexFormat {3, GL_FLOAT, GL_FALSE};
+    VertexAttribute uvFormat {2, GL_FLOAT, GL_FALSE};
+
+    std::vector<const AttributeBinding*> bindings;
+    bindings.resize(shader.getNumAttribs());
+
+    VAO vao(GL_STATIC_DRAW);
+    bindings[shader.getAttribIndex("vertexPosition_modelspace")] = vao.bindBuffer(&vertexFormat, shader.getAttribIndex("vertexPosition_modelspace"), &buffer, sizeof(GLfloat));
+    bindings[shader.getAttribIndex("uv")] = vao.bindBuffer(&uvFormat, shader.getAttribIndex("uv"), &buffer, sizeof(GLfloat));
+    vao.initialize();
 
     GLfloat cubeVertices[36 * 3] = {-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
         1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
@@ -226,31 +232,28 @@ int main()
         1.0f - 0.335903f, 0.667969f, 1.0f - 0.671889f, 1.000004f, 1.0f - 0.671847f, 0.667979f,
         1.0f - 0.335851f};
 
-    Textured3DModel cube(&cubeVertices[0], &cubeUvs[0], 36, texture);
+    vao.begin();
+    vao.addData(bindings[shader.getAttribIndex("vertexPosition_modelspace")], cubeVertices, 36);
+    vao.addData(bindings[shader.getAttribIndex("uv")], cubeUvs, 36);
+    vao.end();
 
-    TextureRenderer context({vbo, uvbo});
-    TexturedMesh cubeMesh = cube.getMesh(&vbo, &uvbo);
-    context.begin();
-    context.addModel(cubeMesh);
-    context.end();
+    // vertexSource = readFile("../shaders/text.vertexshader");
+    // fragmentSource = readFile("../shaders/text.fragmentshader");
+    // ShaderProgram textShader(vertexSource.c_str(), fragmentSource.c_str());
 
-    vertexSource = readFile("../shaders/text.vertexshader");
-    fragmentSource = readFile("../shaders/text.fragmentshader");
-    ShaderProgram textShader(vertexSource.c_str(), fragmentSource.c_str());
+    // glm::mat4 textProjection = glm::ortho(0.0f, 780.0f, 0.0f, 780.0f);
+    // textShader.bindUniform("P", GL_FALSE, &textProjection[0][0]);
+    // textShader.bindUniform("textureSampler", &textureIdx);
+    // textShader.registerGLSetting([]() {
+    //     glActiveTexture(GL_TEXTURE0);
+    //     glEnable(GL_BLEND);
+    //     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // });
 
-    glm::mat4 textProjection = glm::ortho(0.0f, 780.0f, 0.0f, 780.0f);
-    textShader.bindUniform("P", GL_FALSE, &textProjection[0][0]);
-    textShader.bindUniform("textureSampler", &textureIdx);
-    textShader.registerGLSetting([]() {
-        glActiveTexture(GL_TEXTURE0);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    });
-
-    TextRenderer textContext("../resources/fonts/ARIALMT.ttf");
-    textContext.begin();
-    textContext.draw(0.5 * 780.0, 0.5 * 780.0, 1.0, 1.0, 1.0, "H");
-    textContext.end();
+    // TextRenderer textContext("../resources/fonts/ARIALMT.ttf");
+    // textContext.begin();
+    // textContext.draw(0.5 * 780.0, 0.5 * 780.0, 1.0, 1.0, 1.0, "H");
+    // textContext.end();
 
     glClearColor(0.0, 0.0, 0.0, 0.0f);
     glEnable(GL_DEPTH_TEST);
@@ -261,10 +264,11 @@ int main()
 
         glDisable(GL_BLEND);
         shader.use();
-        context.render();
+        glBindTexture(GL_TEXTURE_2D, texture);        
+        vao.render();
 
-        textShader.use();
-        textContext.render();
+        // textShader.use();
+        // textContext.render();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

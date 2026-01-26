@@ -1,89 +1,124 @@
 #include "render_context.h"
 
-#include <algorithm>
+#include <GL/Glew.h>
 
-#include "model.h"
-#include "render_context.h"
+#include <cstddef>
+#include <iterator>
+
+#include "buffer.h"
+#include "utility.h"
 
 
-template<> void Detail::Renderer<Mesh, RenderBatch>::render()
+VAO::VAO(GLenum renderMode) : renderMode(renderMode)
 {
-    glBindVertexArray(vao);
-    for (GLint i = 0; i < numAttribs; i++) {
-        glEnableVertexAttribArray(i);
-    }
-    for (int i = 0; i < renderBatches.size(); i++) {
-        glDrawArrays(GL_TRIANGLES, renderBatches[i].offset, renderBatches[i].numVertex);
-    }
-    for (GLint i = 0; i < numAttribs; i++) {
-        glDisableVertexAttribArray(i);
-    }
-    glBindVertexArray(0);
+    glGenVertexArrays(1, &id);
 }
 
 
-template<> void Detail::Renderer<Mesh, RenderBatch>::generateBatches()
+VAO::~VAO()
 {
-    unsigned int numVertex = 0;
-    for (int i = 0; i < toRender.size(); i++) {
-        toRender[i].insert(numVertex);
-        numVertex += toRender[i].getNumVertex();
+    delete[] buffers;
+
+    for (AttributeBinding* binding : attribBindings) {
+        delete binding;
     }
-
-    renderBatches.emplace_back(0, numVertex);
-
-    for (int i = 0; i < numBuffers; i++) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffers[i]->getId());
-        glBufferData(GL_ARRAY_BUFFER, buffers[i]->getByteSize() * buffers[i]->getSize(),
-            buffers[i]->data(), GL_STATIC_DRAW);
-    }
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 
-template<> void Detail::Renderer<TexturedMesh, TextureBatch>::render()
+const AttributeBinding* VAO::bindBuffer(
+    const VertexAttribute* attribute, unsigned int index, VertexBuffer* buffer, std::size_t valSize)
 {
-    glBindVertexArray(vao);
-    for (GLint i = 0; i < numAttribs; i++) {
-        glEnableVertexAttribArray(i);
+    AttributeBinding* binding = new AttributeBinding;
+    binding->attribute = attribute;
+    binding->buffer = buffer;
+    binding->index = index;
+    binding->valSize = valSize;
+    binding->offset = 0;
+    binding->stride = -1;  // Set when all attributes for buffer are bound
+
+    std::vector<AttributeBinding*>::iterator it = sortedInsert(attribBindings, binding,
+        [](AttributeBinding* a, AttributeBinding* b) { return a->buffer == b->buffer; }
+    );
+
+    if (++it != attribBindings.end()) {  // Other binding for buffer exists
+        binding->offset = (*it)->offset + (*it)->valSize * (*it)->attribute->size;
     }
-    for (int i = 0; i < renderBatches.size(); i++) {
-        glBindTexture(GL_TEXTURE_2D, renderBatches[i].texture);
-        glDrawArrays(GL_TRIANGLES, renderBatches[i].offset, renderBatches[i].numVertex);
+    else {
+        numBuffers++;
     }
-    glBindTexture(GL_TEXTURE_2D, 0);
-    for (GLint i = 0; i < numAttribs; i++) {
-        glDisableVertexAttribArray(i);
-    }
-    glBindVertexArray(0);
+
+    return binding;
 }
 
 
-template<> void Detail::Renderer<TexturedMesh, TextureBatch>::generateBatches()
+void VAO::initialize()
 {
-    std::sort(toRender.begin(), toRender.end(), [](const TexturedMesh& a, const TexturedMesh& b) {
-        return a.getTexture() <= b.getTexture();
-    });
-
-    renderBatches.emplace_back(0, toRender[0].getNumVertex(), toRender[0].getTexture());
-    toRender[0].insert(0);
-
-    TextureBatch* currBatch = &renderBatches[0];
-    for (int i = 1; i < toRender.size(); i++) {
-        if (toRender[i].getTexture() != toRender[i - 1].getTexture()) {
-            renderBatches.emplace_back(currBatch->numVertex, 0, toRender[i].getTexture());
-            currBatch = &renderBatches.back();
+    buffers = new VertexBuffer*[numBuffers];
+    
+    glBindVertexArray(id);
+    
+    std::size_t bufferIdx = 0;
+    std::size_t stride;
+    VertexBuffer* prevBuffer = nullptr;
+    for (AttributeBinding* binding : attribBindings) {
+        if (binding->buffer != prevBuffer) {
+            stride = binding->offset + binding->attribute->size * binding->valSize;
+            
+            prevBuffer = binding->buffer;
+            buffers[bufferIdx++] = prevBuffer;
         }
 
-        toRender[i].insert(currBatch->numVertex);
-        currBatch->numVertex += toRender[i].getNumVertex();
+        binding->stride = stride;
+
+        glBindBuffer(GL_ARRAY_BUFFER, binding->buffer->id());
+        glVertexAttribPointer(
+            binding->index,
+            binding->attribute->size,
+            binding->attribute->glType,
+            binding->attribute->normalized,
+            binding->stride,
+            (void*)binding->offset
+        );
     }
 
-    for (int i = 0; i < numBuffers; i++) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffers[i]->getId());
-        glBufferData(GL_ARRAY_BUFFER, buffers[i]->getByteSize() * buffers[i]->getSize(),
-            buffers[i]->data(), GL_STATIC_DRAW);
-    }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+
+void VAO::begin()
+{    
+}
+
+
+void VAO::end()
+{
+    for (std::size_t i = 0; i < numBuffers; i++) {
+        buffers[i]->use(renderMode);
+    }
+
+    numVertex = attribBindings[0]->buffer->size() / attribBindings[0]->stride;
+}
+
+
+void VAO::addData(const AttributeBinding* binding, const void* data, unsigned int numVertex)
+{
+    std::size_t vertexSize = binding->valSize * binding->attribute->size;
+    binding->buffer->add(
+        data, numVertex * vertexSize, vertexSize, binding->stride, binding->offset
+    );
+}
+
+
+void VAO::render()
+{
+    glBindVertexArray(id);
+    for (AttributeBinding* binding : attribBindings) {
+        glEnableVertexAttribArray((GLint)(binding->index));
+    }
+    glDrawArrays(GL_TRIANGLES, 0, numVertex);
+    for (AttributeBinding* binding : attribBindings) {
+        glDisableVertexAttribArray((GLint)(binding->index));
+    }
+    glBindVertexArray(0);
 }
