@@ -5,8 +5,6 @@
 #include <cstring>
 #include <cassert>
 
-#include <cstdio>
-
 
 VertexBuffer::VertexBuffer(std::size_t size) : _size(size)
 {
