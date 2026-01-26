@@ -54,7 +54,8 @@ class VAO {
     /// @param binding Buffer binding to insert values into.
     /// @param data Values to insert into buffer.
     /// @param numVertex Number of vertices to insert.
-    void addData(const AttributeBinding* binding, const void* data, unsigned int numVertex);
+    void addData(const AttributeBinding* binding, const void* data, unsigned int numVertex,
+        unsigned int vertexOffset = 0);
 
     /// @brief Renders all added vertices.
     /// @param offset Index of first vertex to draw.

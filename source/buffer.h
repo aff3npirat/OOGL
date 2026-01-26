@@ -28,7 +28,7 @@ class VertexBuffer {
     GLuint id() const { return _id; }
     std::size_t size() const { return _size; }
   
-  private:
+  protected:
     void resize(std::size_t size);
 
     std::uint8_t* data;

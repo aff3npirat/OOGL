@@ -1,11 +1,10 @@
-#include "test_buffer.h"
-
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <testsuite.h>
 
 #include <cstdio>
 
-#include <testsuite.h>
+#include "test_vao.h"
 
 
 GLFWwindow* init_gl(std::string title, const int width, const int height) {

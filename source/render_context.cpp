@@ -101,9 +101,11 @@ void VAO::end()
 }
 
 
-void VAO::addData(const AttributeBinding* binding, const void* data, unsigned int numVertex)
+void VAO::addData(const AttributeBinding* binding, const void* data, unsigned int numVertex,
+    unsigned int vertexOffset)
 {
     std::size_t vertexSize = binding->valSize * binding->attribute->size;
+    std::size_t offset = binding->offset + vertexOffset * vertexSize;
     binding->buffer->add(
         data, numVertex * vertexSize, vertexSize, binding->stride, binding->offset
     );
