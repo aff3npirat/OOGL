@@ -1,7 +1,7 @@
 ## TEST SUITE ##
 set(UTS_ROOT ${CMAKE_SOURCE_DIR}/../UnitTestSuite)
 set(UTS_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-add_subdirectory(${UTS_ROOT} ${CMAKE_BINARY_DIR}/Libs/testsuite)
+add_subdirectory(${UTS_ROOT} ${CMAKE_BINARY_DIR}/Lib/testsuite)
 
 
 include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
