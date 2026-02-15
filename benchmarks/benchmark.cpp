@@ -26,25 +26,19 @@ BenchmarkStats run_impl(GLFWwindow* window)
     assert(screenHeight % yCubes == 0);
     unsigned int numVertex = xCubes * yCubes * 36;
 
-    Buffer buf;
-    buf.resize(std::in_place_type<GLfloat>, numVertex * 4);
-    BufferView vbo(&buf, 4, 0, 3, GL_FLOAT);
-    BufferView cbo(&buf, 4, 3, 1, GL_FLOAT);
-    const BufferView* buffers[2] = {&vbo, &cbo};
-    Renderer renderer({vbo, cbo});
+    VertexBuffer buf(numVertex * 4);
+    VertexAttribute posFmt = {3, GL_FLOAT, GL_FALSE};
+    VertexAttribute colorFmt = {1, GL_FLOAT, GL_FALSE};
+    VAO vao(GL_STATIC_DRAW);
+    const AttributeBinding* posAttrib = vao.bindBuffer(&posFmt, 0, &buf, sizeof(GLfloat));
+    const AttributeBinding* colorAttrib = vao.bindBuffer(&colorFmt, 1, &buf, sizeof(GLfloat));
+    vao.initialize();
 
     GLfloat* vertices = new GLfloat[numVertex * 3];
     GLfloat* colors = new GLfloat[numVertex * 1];
 
-    renderer.begin();
+    vao.begin();
     getVertexData(vertices, colors, xCubes, yCubes, screenWidth, screenHeight);
-    for (int i = 0; i < numVertex; i += 36) {
-        Mesh mesh(36);
-        mesh.addVertexData(&vbo, &vertices[i * 3]);
-        mesh.addVertexData(&cbo, &colors[i]);
-        renderer.addModel(mesh);
-    }
-    renderer.end();
 
     ShaderProgram shader(readFile("../shaders/benchmark.vertexshader").c_str(),
         readFile("../shaders/benchmark.fragmentshader").c_str());
@@ -62,8 +56,10 @@ BenchmarkStats run_impl(GLFWwindow* window)
         shader.use();
 
         clock_t start = clock();
-        renderer.end();
-        renderer.render();
+        vao.addData(posAttrib, vertices, numVertex, 0);
+        vao.addData(colorAttrib, colors, numVertex, 0);
+        vao.end();
+        vao.render(0, numVertex);
         clock_t end = clock();
 
         deltaTime = end - start;

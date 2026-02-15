@@ -5,7 +5,6 @@
 #include <math.h>
 
 #include "buffer.h"
-#include "model.h"
 #include "render_context.h"
 
 
