@@ -139,7 +139,7 @@ unsigned int TextRender::draw(const AttributeBinding* position,
                 sizeof(float) * 12,
                 position->attribute->size * position->valSize,
                 position->stride,
-                offset * position->attribute->size * position->valSize + position->offset
+                offset * position->stride + position->offset
             );
 
             uv->buffer->add(
@@ -147,7 +147,7 @@ unsigned int TextRender::draw(const AttributeBinding* position,
                 sizeof(float) * 12,
                 uv->attribute->size * uv->valSize,
                 uv->stride,
-                offset * uv->attribute->size * uv->valSize + uv->offset
+                offset * uv->stride + uv->offset
             );
 
             offset += 6;

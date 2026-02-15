@@ -260,7 +260,7 @@ int main()
     });
 
     TextRender textContext("../resources/fonts/ARIALMT.ttf", 0, 780, 780);
-    textContext.add("HE", 0.7, 0.45, 0.9, 0.55);
+    textContext.add("Hello World!", 0.7, 0.45, 0.9, 0.55);
 
     textVAO.begin();
     GLuint* charTextures = new GLuint[textContext.getNumTextures()];
