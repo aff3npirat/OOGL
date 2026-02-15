@@ -118,6 +118,12 @@ void TextRender::add(const char* text, float x1, float y1, float x2, float y2)
 }
 
 
+void TextRender::clear()
+{
+    glyphs.clear();
+}
+
+
 unsigned int TextRender::draw(const AttributeBinding* position,
     const AttributeBinding* uv,
     GLuint* textures,
