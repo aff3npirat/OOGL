@@ -259,7 +259,7 @@ int main()
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     });
 
-    TextRender textContext("../resources/fonts/ARIALMT.ttf", 0, 780, 780);
+    TextRender textContext("../resources/fonts/ARIALMT.ttf", 0);
     textContext.add("Hello World!", 0.7, 0.45, 0.9, 0.55);
 
     textVAO.begin();

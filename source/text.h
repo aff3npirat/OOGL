@@ -25,15 +25,12 @@ GLuint generateTexture(char c, FT_Bitmap* bitmap);
 
 class TextRender {
   public:
-    TextRender(const char* fpath,
-        signed long idx,
-        unsigned int width,
-        unsigned int height);
+    TextRender(const char* fpath, signed long idx);
 
     /// @brief Stores text to be rendered.
     /// @param text Text to render.
-    /// @param x1, y1, x2, y2 Text will be placed in bounds (x1, y1) <-> (x2,
-    /// y2).
+    /// @param x1, y1, x2, y2 Text will be placed in bounds (x1, y1) <->
+    /// (x2, y2).
     void add(const char* text, float x1, float y1, float x2, float y2);
 
     /// @brief Clears all collected text.
@@ -60,8 +57,6 @@ class TextRender {
 
     static FaceCache _cache;
 
-    unsigned int hPixels;
-    unsigned int vPixels;
     FT_Library library;
     FT_Face face;
     CharCache* cache;

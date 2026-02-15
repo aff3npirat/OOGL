@@ -42,8 +42,7 @@ GLuint generateTexture(char c, FT_Bitmap* bitmap)
 
 
 TextRender::TextRender(
-    const char* fpath, signed long idx, unsigned int width, unsigned height)
-    : hPixels(width), vPixels(height)
+    const char* fpath, signed long idx)
 {
     if (FT_Init_FreeType(&library)) {
         throw std::runtime_error("Could not load FreeType2");
