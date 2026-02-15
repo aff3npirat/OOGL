@@ -74,7 +74,7 @@ void TextRender::add(const char* text, float x1, float y1, float x2, float y2)
         char c = text[i];
         Character current;
         if (cache->contains(c)) {
-            current = (*cache)[0];
+            current = (*cache)[c];
         }
         else if (!FT_Load_Char(face, c, FT_LOAD_RENDER)) {
             current = {generateTexture(text[i], &face->glyph->bitmap), face->glyph->bitmap.width,
