@@ -5,10 +5,11 @@
 #include FT_FREETYPE_H
 
 #include <map>
-#include <vector>
-#include <cstdlib>
+#include <string>
+#include <utility>
 
 #include "render_context.h"
+#include "polygons.h"
 
 
 struct Character {
@@ -18,26 +19,52 @@ struct Character {
     long int advanceX;
 };
 
-class TextRenderer {
-  public:
-    TextRenderer(const char* fpath);
-    ~TextRenderer();
 
-    void begin();
-    void end();
-    void draw(GLfloat x, GLfloat y, GLfloat R, GLfloat G, GLfloat B, const char* text);
-    void render();
+GLuint generateTexture(char c, FT_Bitmap* bitmap);
+
+
+class TextRender {
+  public:
+    TextRender(const char* fpath,
+        signed long idx,
+        unsigned int width,
+        unsigned int height);
+
+    /// @brief Stores text to be rendered.
+    /// @param text Text to render.
+    /// @param x1, y1, x2, y2 Text will be placed in bounds (x1, y1) <-> (x2,
+    /// y2).
+    void add(const char* text, float x1, float y1, float x2, float y2);
+
+    /// @brief Clears all collected text.
+    void clear();
+
+    /// @brief Inserts vertex data of stored text into buffers.
+    /// @param position, uv, color Specify buffers/layout in which data is
+    /// inserted.
+    /// @param textures, offsets Returns id and vertex offset (from buffer
+    /// beginning) for each used texture.
+    /// @return Number of vertices written to `textures` and `offsets`.
+    unsigned int draw(const AttributeBinding* position,
+        const AttributeBinding* uv,
+        GLuint* textures,
+        unsigned int* offsets);
+
+    /// @brief Returns number of different textures currently used.
+    std::size_t getNumTextures() const { return glyphs.size(); }
 
   private:
-    GLuint generate_texture(char c, FT_Bitmap* bitmap);
+    using FaceID = std::pair<std::string, FT_Long>;
+    using CharCache = std::map<char, Character>;
+    using FaceCache = std::map<FaceID, CharCache>;
 
-    std::size_t bufferSize;
-    Buffer buffer;
-    BufferView vbo;
-    BufferView uvbo;
-    BufferView cbo;
-    TextureRenderer renderer;
+    static FaceCache _cache;
+
+    unsigned int hPixels;
+    unsigned int vPixels;
     FT_Library library;
     FT_Face face;
-    std::map<char, Character> cache;
+    CharCache* cache;
+    using glyph_map_t = std::map<GLuint, std::vector<Rectangle<float>>>;
+    glyph_map_t glyphs;
 };

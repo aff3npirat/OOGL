@@ -112,13 +112,13 @@ void VAO::addData(const AttributeBinding* binding, const void* data, unsigned in
 }
 
 
-void VAO::render()
+void VAO::render(unsigned int offset, unsigned int numVertex)
 {
     glBindVertexArray(id);
     for (AttributeBinding* binding : attribBindings) {
         glEnableVertexAttribArray((GLint)(binding->index));
     }
-    glDrawArrays(GL_TRIANGLES, 0, numVertex);
+    glDrawArrays(GL_TRIANGLES, offset, numVertex);
     for (AttributeBinding* binding : attribBindings) {
         glDisableVertexAttribArray((GLint)(binding->index));
     }

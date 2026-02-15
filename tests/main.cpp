@@ -15,7 +15,7 @@
 #include "source/buffer.h"
 #include "source/render_context.h"
 #include "source/shader.h"
-// #include "source/text.h"
+#include "source/text.h"
 
 
 int init_glfw()
@@ -237,23 +237,41 @@ int main()
     vao.addData(bindings[shader.getAttribIndex("uv")], cubeUvs, 36);
     vao.end();
 
-    // vertexSource = readFile("../shaders/text.vertexshader");
-    // fragmentSource = readFile("../shaders/text.fragmentshader");
-    // ShaderProgram textShader(vertexSource.c_str(), fragmentSource.c_str());
+    vertexSource = readFile("../shaders/text.vertexshader");
+    fragmentSource = readFile("../shaders/text.fragmentshader");
+    ShaderProgram textShader(vertexSource.c_str(), fragmentSource.c_str());
 
-    // glm::mat4 textProjection = glm::ortho(0.0f, 780.0f, 0.0f, 780.0f);
-    // textShader.bindUniform("P", GL_FALSE, &textProjection[0][0]);
-    // textShader.bindUniform("textureSampler", &textureIdx);
-    // textShader.registerGLSetting([]() {
-    //     glActiveTexture(GL_TEXTURE0);
-    //     glEnable(GL_BLEND);
-    //     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // });
+    VertexBuffer textBuf(1);
+    VertexAttribute textPosFmt {2, GL_FLOAT, GL_FALSE};
+    VertexAttribute textUVFmt {2, GL_FLOAT, GL_FALSE};
+    VAO textVAO(GL_STATIC_DRAW);
+    const AttributeBinding* textPos = textVAO.bindBuffer(&textPosFmt, 0, &textBuf, sizeof(float));
+    const AttributeBinding* textUV = textVAO.bindBuffer(&textUVFmt, 1, &textBuf, sizeof(float));
+    textVAO.initialize();
 
-    // TextRenderer textContext("../resources/fonts/ARIALMT.ttf");
-    // textContext.begin();
-    // textContext.draw(0.5 * 780.0, 0.5 * 780.0, 1.0, 1.0, 1.0, "H");
-    // textContext.end();
+    // glm::mat4 textProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
+    glm::mat4 textProjection = glm::mat4(1.0f);  // Identity
+    textShader.bindUniform("P", GL_FALSE, &textProjection[0][0]);
+    textShader.bindUniform("textureSampler", &textureIdx);
+    textShader.registerGLSetting([]() {
+        glActiveTexture(GL_TEXTURE0);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    });
+
+    TextRender textContext("../resources/fonts/ARIALMT.ttf", 0, 780, 780);
+    textContext.add("HE", 0.7, 0.45, 0.9, 0.55);
+
+    textVAO.begin();
+    GLuint* charTextures = new GLuint[textContext.getNumTextures()];
+    unsigned int* offsets = new unsigned int[textContext.getNumTextures()];
+    unsigned int numTextures = textContext.draw(
+        textPos,
+        textUV,
+        charTextures,
+        offsets
+    );
+    textVAO.end();
 
     glClearColor(0.0, 0.0, 0.0, 0.0f);
     glEnable(GL_DEPTH_TEST);
@@ -265,10 +283,15 @@ int main()
         glDisable(GL_BLEND);
         shader.use();
         glBindTexture(GL_TEXTURE_2D, texture);        
-        vao.render();
+        vao.render(0, 180);
 
-        // textShader.use();
-        // textContext.render();
+        textShader.use();
+        for (int i = 0; i < numTextures - 1; i++) {
+            glBindTexture(GL_TEXTURE_2D, charTextures[i]);
+            textVAO.render(offsets[i], offsets[i + 1] - offsets[i]);
+        }
+        glBindTexture(GL_TEXTURE_2D, charTextures[numTextures - 1]);
+        textVAO.render(offsets[numTextures - 1], vao.getNumVertex() - offsets[numTextures - 1]);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

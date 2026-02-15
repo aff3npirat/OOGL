@@ -22,14 +22,14 @@ VertexBuffer::~VertexBuffer()
 void VertexBuffer::add(const void* values, std::size_t n, std::size_t vertexSize,
     std::size_t stride, std::size_t offset)
 {
-    assert((n / vertexSize) * vertexSize == n);
-    assert((n / vertexSize) * stride <= _size);
-
     // TODO choose better size
-    std::size_t requiredSize = (n / vertexSize) * stride;
+    std::size_t requiredSize = (n / vertexSize) * stride + offset;
     if (requiredSize > _size) {
         resize(requiredSize);
     }
+
+    assert((n / vertexSize) * vertexSize == n);
+    assert((n / vertexSize) * stride <= _size);
 
     if (stride == 0) {
             std::memcpy(data + offset, values, n);

@@ -60,7 +60,9 @@ class VAO {
     /// @brief Renders all added vertices.
     /// @param offset Index of first vertex to draw.
     /// @param numVertex Number of vertices to draw.
-    void render();
+    void render(unsigned int offset, unsigned int numVertex);
+
+    unsigned int getNumVertex() { return numVertex; }
 
   private:
     GLuint id;
